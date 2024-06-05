@@ -1,0 +1,113 @@
+lsof -i :5001
+kill -9 <PID>
+
+
+#Use apache benchmark to make a total of 500 request to measure perfomance
+ab -c 50 -n 500 localhost:5001/fast
+
+
+#Node js 
+
+pm2 monit
+
+pm2 start server.js -i 0
+
+
+Stop all instances 
+% pm2 delete server
+
+
+#pm2 start on production
+
+pm2 start server.js
+
+"scripts": {
+  "start": "pm2 start your_app.js --name your-app-name"
+}
+
+
+
+//for Docker 
+   "start": "node server.js",
+
+   //dev
+   "start": "nodemon server.js",
+
+   //production
+       "start": "pm2 start server.js",
+
+
+ https://api.telegram.org/bot6546034250:AAElX9WSyoXAtip07XJH0tVbvTcBHCIUzXM/getUpdates
+
+curl -s "https://api.telegram.org/bot6546034250:AAElX9WSyoXAtip07XJH0tVbvTcBHCIUzXM/getUpdates?offset=LAST_UPDATE_ID&timeout=60"
+
+
+-----------------------------------------Docker setup ----------------------------------------------------------------
+
+docker-compose up --build
+
+//setting timeout here 
+
+timeout 600 docker-compose up --build
+
+
+//compose down 
+
+docker-compose down  
+
+// check docker logs
+
+sudo docker logs automatedtelegramserver-app-1
+
+-----------------------------------------------------------------
+
+
+pgcli postgresql://postgres:1234@localhost:5432/postgres
+
+
+
+sudo docker exec -it ace39ed6a7c9 psql -h 41.72.145.2 -U masskg -d postgres -p 7704
+
+sudo  docker-compose up --build  -d
+sudo  docker-compose down
+
+Thabisoblessed
+
+---current token ---
+
+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
+
+
+
+// Installing Docker Git & Docker Compose  
+
+
+
+sudo apt update
+
+sudo apt upgrade
+
+sudo apt install git
+
+
+
+sudo apt-get install docker.io
+
+
+sudo systemctl start docker
+sudo systemctl enable docker
+
+
+docker --version
+
+sudo apt install docker-compose
+
+sudo apt install docker-buildx
+
+docker-compose --version
+
+
+sudo systemctl restart docker
+
+/// all useless volumes network dangling containers unused images 
+ docker system prune -a --volumes
