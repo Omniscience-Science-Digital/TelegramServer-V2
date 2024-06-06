@@ -18,8 +18,8 @@ const timeZone = 'Africa/Johannesburg';
     //   await report_controller.reportdata(items,"day");
 
    
-    const items = await scanDynamoDBTableNight('06:00');
-    await report_controller.reportdata(items,"night");
+    // const items = await scanDynamoDBTableNight('06:00');
+    // await report_controller.reportdata(items,"night");
 
 //     } catch (error) {
 //         console.error('Error:', error);
