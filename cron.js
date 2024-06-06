@@ -1,4 +1,4 @@
-const { scanDynamoDBTableDay, scanDynamoDBTableNight } = require('./repositories/dynamodb_repository');
+const { scanDynamoDBTableDay, scanDynamoDBTableNight ,scanDynamoDBTableExtraShift} = require('./repositories/dynamodb_repository');
 const report_controller = require('./controllers/cron.controller');
 
 const cron = require('node-cron');
@@ -14,11 +14,12 @@ const timeZone = 'Africa/Johannesburg';
 (async () => {
 //     try {
 
-    //  const items = await scanDynamoDBTableDay('18:30');
+    //  const items = await scanDynamoDBTableDay('14:00');
     //   await report_controller.reportdata(items,"day");
 
-    // const items = await scanDynamoDBTableNight('06:00');
-    // await report_controller.reportdata(items,"night");
+   
+    const items = await scanDynamoDBTableNight('06:00');
+    await report_controller.reportdata(items,"night");
 
 //     } catch (error) {
 //         console.error('Error:', error);
@@ -73,11 +74,18 @@ cron.schedule('0 19 * * *', async () => {
 
 
 cron.schedule('0 22 * * *', async () => {
-    // This cron job triggers every day at 7 PM SAST
+    // This cron job triggers every day at 22 PM SAST
 
     const items = await scanDynamoDBTableDay('22:00');
-    await report_controller.reportdata(items, "day");
+    //extrashift items
+    const extrashiftitems =await scanDynamoDBTableExtraShift('22:00')
+
+    let combinedItems = items.concat(extrashiftitems);
+
+    await report_controller.reportdata(combinedItems,"day");
+
 }, { timezone: timeZone });
+
 
 
 

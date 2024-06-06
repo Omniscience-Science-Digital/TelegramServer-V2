@@ -4,7 +4,7 @@ const { singlecaleCalcsFunc } = require('./single.scale.utility');
 const { parallelcaleCalcsFunc } = require('./parallel.scale.utility')
 const { plcScaleCalcsFunc } = require('./plc.scale.utility.js')
 const { handleShiftons ,handlePlcShiftons} = require('./shiftons.utility');
-const { flowutility ,flowDataPLC} = require('./flow.utility');
+const { flowutility ,flowDataPLC,cycloneDataPLC} = require('./flow.utility');
 const { calculatorCalculations } = require('./formulas.utility');
 const { createDonutChart } = require('../helpers/charts/chart_helper');
 
@@ -46,10 +46,13 @@ module.exports.singleScale = async (startTime, endTime, scales, monthstart, shif
 
         }
 
+
+        let cyclonegraphbuffer;
+
   
         shift_statisticsPie = { shift_statisticsPie }
 
-        const combinedObject = { ...flow_Values, ...tonnage, ...shift_statisticsPie, ...{ primaryScalesArray },...shiftStats };
+        const combinedObject = { ...flow_Values,...{cyclonegraphbuffer}, ...tonnage, ...shift_statisticsPie, ...{ primaryScalesArray },...shiftStats };
 
 
         return combinedObject;
@@ -59,7 +62,6 @@ module.exports.singleScale = async (startTime, endTime, scales, monthstart, shif
         throw error; // Optionally rethrow to propagate the error further
     }
 }
-
 
 module.exports.seriesScale = async (startTime, endTime, scales, monthstart, flowtitle, flowiccid, shift, primaryScalesArray, runningtph, maxUtilization, mtd_target, scaleType, canvas, formulas, virtualDatapoints,shifts_Ran) => {
     try {
@@ -100,12 +102,13 @@ module.exports.seriesScale = async (startTime, endTime, scales, monthstart, flow
 
         }
 
+        let cyclonegraphbuffer;
        
 
 
         shift_statisticsPie = { shift_statisticsPie }
 
-        const combinedObject = { ...flow_Values, ...tonnage, ...shift_statisticsPie, ...{ primaryScalesArray },...shiftStats };
+        const combinedObject = { ...flow_Values,...{cyclonegraphbuffer}, ...tonnage, ...shift_statisticsPie, ...{ primaryScalesArray },...shiftStats };
 
         return combinedObject;
 
@@ -141,7 +144,7 @@ module.exports.parallelScale = async (startTime, endTime, scales, monthstart, fl
         let tonnage = await handleShiftons(myflowBuffer, shift, postgress_start, postgress_end, startdate, enddate, scales, monthstart, primaryScalesArray, mtd_target, scaleType, canvas, virtualDatapoints,maxUtilization)
 
 
-
+        let cyclonegraphbuffer;
 
         let shiftStats = await calculatorCalculations(formulas, tonnage, flow_Values)
         //plot pie charts
@@ -156,7 +159,7 @@ module.exports.parallelScale = async (startTime, endTime, scales, monthstart, fl
 
         shift_statisticsPie = { shift_statisticsPie }
 
-        const combinedObject = { ...flow_Values, ...tonnage, ...shift_statisticsPie, ...{ primaryScalesArray },...shiftStats };
+        const combinedObject = { ...flow_Values,...{cyclonegraphbuffer}, ...tonnage, ...shift_statisticsPie, ...{ primaryScalesArray },...shiftStats };
 
 
 
@@ -172,7 +175,6 @@ module.exports.parallelScale = async (startTime, endTime, scales, monthstart, fl
     }
 
 }
-
 
 
 module.exports.plcScale = async (startTime, endTime, scales,plcIccid,plcFlow,cyclonegraph, monthstart, shift, primaryScalesArray, runningtph, maxUtilization, mtd_target, scaleType,canvas,formulas,virtualDatapoints,shifts_Ran) => {
@@ -192,6 +194,7 @@ module.exports.plcScale = async (startTime, endTime, scales,plcIccid,plcFlow,cyc
 
         const myflowBuffer = await flowDataPLC(postgress_start, postgress_end, startdate, enddate, plcFlow, canvas,plcIccid);
 
+        let cyclonegraphbuffer = await cycloneDataPLC(postgress_start, postgress_end, startdate, enddate, cyclonegraph, canvas,plcIccid);
   
         //check if site ran
         let flow_Values = await plcScaleCalcsFunc(shifts_Ran,monthstart,shift,postgress_start, postgress_end, startdate, enddate,plcFlow, runningtph, maxUtilization, scales, primaryScalesArray,plcIccid)
@@ -214,10 +217,11 @@ module.exports.plcScale = async (startTime, endTime, scales,plcIccid,plcFlow,cyc
 
         }
 
+        
 
         shift_statisticsPie = { shift_statisticsPie }
 
-        const combinedObject = { ...flow_Values, ...tonnage, ...shift_statisticsPie, ...{ primaryScalesArray },...shiftStats };
+        const combinedObject = { ...flow_Values,...{cyclonegraphbuffer}, ...tonnage, ...shift_statisticsPie, ...{ primaryScalesArray },...shiftStats };
 
 
         

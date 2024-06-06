@@ -23,7 +23,6 @@ async function PDFTableGenerator(pdfdata,sitename,filePath,reportHeaderRenames, 
   return new Promise(async (resolve, reject) => {
     // Create a document and enable bufferPages mode
 
-    
     const doc = new PDFDocument(pageOptions, docOptions);
 
     doc.font("Times-Roman");
@@ -33,7 +32,6 @@ async function PDFTableGenerator(pdfdata,sitename,filePath,reportHeaderRenames, 
     // Global variable declaration
     customerInformationTop = 95;
 
-  
     // Generate the PDF content
      generateHeader(doc);
      generateFooter(doc);
@@ -50,7 +48,6 @@ async function PDFTableGenerator(pdfdata,sitename,filePath,reportHeaderRenames, 
 
 
     //draw , header rectangles
-
     drawHeaderRectangles(doc,reportHeaderRenames,pdfdata,(customerInformationTop + 40) );
 
     //shift staistics header
@@ -97,7 +94,7 @@ async function PDFTableGenerator(pdfdata,sitename,filePath,reportHeaderRenames, 
 
      //flow graph
      drawRectangleWithText(doc, 'SHIFT MASS FLOW TREND', customerInformationTop = 70);
-     generateflowShifttonsGraph(doc,pdfdata.flowGraphBuffer, 95, 322)
+     generateflowShifttonsGraph(doc,pdfdata.flowGraphBuffer,pdfdata.cyclonegraphbuffer, 95, 322)
 
        //shift tons graph
 
@@ -117,7 +114,7 @@ async function PDFTableGenerator(pdfdata,sitename,filePath,reportHeaderRenames, 
     const range = doc.bufferedPageRange(); // => { start: 0, count: 2 }
 
     
-    //doc.pipe(fs.createWriteStream('./z/'+filePath));
+   // doc.pipe(fs.createWriteStream('./z/'+filePath));
 
     // Manually flush pages that have been buffered
     doc.flushPages();

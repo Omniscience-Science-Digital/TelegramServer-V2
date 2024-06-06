@@ -270,7 +270,7 @@ module.exports.drawHeaderRectangles = (doc, reportHeaderRenames, reportDataArray
         width: monthkeylen,
     },
     {
-        text: '  ' +reportDataArray.mtdruntime + ' hours',
+        text: ' ' +reportDataArray.mtdruntime + ' hours',
         width: 0.7,
     },
 ])

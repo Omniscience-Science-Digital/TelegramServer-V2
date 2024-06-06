@@ -11,7 +11,7 @@ const {canvas} = require('../resources/static.headers.resource');
 exports.runReportdata = async (req, res) => {
 
     // Access the id from the request body
-    const { PlantName,run_production } = req.body;
+    const { PlantName,run_production,shift } = req.body;
 
 
     const report = await scanDynamoDBTablewithname(PlantName);
@@ -27,8 +27,6 @@ exports.runReportdata = async (req, res) => {
 
     let sites =items;
 
-    let shift="night"
-
 
     try {
         // Destructure sites
@@ -40,6 +38,8 @@ exports.runReportdata = async (req, res) => {
 
             //don't run if not allowed
             if (!sitestatus) continue;
+
+            if (!shift) continue;
 
          
 
@@ -84,6 +84,10 @@ exports.runReportdata = async (req, res) => {
             primaryScalesArray = primaryScales?.L?.map((scale) => scale.S) || [];
             const plcflowArray = parseScales(plcFlow);
 
+            const cyclonegraphArray =parseScales(cyclonegraph)
+
+      
+
 
 
             const formattedDate = new Date(monthstart).toLocaleDateString('en-GB', {
@@ -113,7 +117,7 @@ exports.runReportdata = async (req, res) => {
 
             } else if (plcIccid) {
                 console.log('Processing plc scale type'); // Additional log for debugging
-                reportDataArray = await plcScale(startTime, endTime, scales, plcIccid, plcflowArray, cyclonegraph, monthstart, shift, primaryScalesArray, runningtph, maxUtilization, mtd_target, scaleType, canvas, formulas, virtualDatapoints, shifts_Ran);
+                reportDataArray = await plcScale(startTime, endTime, scales, plcIccid, plcflowArray, cyclonegraphArray, monthstart, shift, primaryScalesArray, runningtph, maxUtilization, mtd_target, scaleType, canvas, formulas, virtualDatapoints, shifts_Ran);
 
             }
 

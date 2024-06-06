@@ -69,7 +69,9 @@ exports.reportdata = async (sites, shift) => {
             primaryScalesArray = primaryScales?.L?.map((scale) => scale.S) || [];
             const plcflowArray = parseScales(plcFlow);
 
+            const cyclonegraphArray =parseScales(cyclonegraph)
 
+    
 
             const formattedDate = new Date(monthstart).toLocaleDateString('en-GB', {
                 day: 'numeric',
@@ -98,7 +100,7 @@ exports.reportdata = async (sites, shift) => {
 
             } else if (plcIccid) {
                 console.log('Processing plc scale type'); // Additional log for debugging
-                reportDataArray = await plcScale(startTime, endTime, scales, plcIccid, plcflowArray, cyclonegraph, monthstart, shift, primaryScalesArray, runningtph, maxUtilization, mtd_target, scaleType, canvas, formulas, virtualDatapoints, shifts_Ran);
+                reportDataArray = await plcScale(startTime, endTime, scales, plcIccid, plcflowArray, cyclonegraphArray, monthstart, shift, primaryScalesArray, runningtph, maxUtilization, mtd_target, scaleType, canvas, formulas, virtualDatapoints, shifts_Ran);
 
             }
 

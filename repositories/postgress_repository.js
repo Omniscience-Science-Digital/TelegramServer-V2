@@ -570,6 +570,41 @@ exports.getPlcFlowValues = async (startTime, endTime, startdate, enddate, title,
   }
 };
 
+
+//cyclone data graph 
+
+exports.getPlcCycloneValues = async (startTime, endTime, startdate, enddate, title, plcIccid) => {
+  try {
+    const query = `SELECT DISTINCT ON (date)
+    date AS interval_start,
+    iccid,
+    value::numeric AS monthTons
+    FROM
+    public.devicelogs_production_${plcIccid}
+    WHERE
+    title='${title}'
+    AND date BETWEEN '${startdate} ${startTime}' AND '${enddate} ${endTime}'
+    ORDER BY
+        date ASC;      
+      `;
+
+
+    const result = await db.query(query);
+
+
+    // Extract the "flowdata" value from the rows
+    const flowdata = result.rows;
+
+
+
+    return flowdata;
+  } catch (error) {
+    console.error('Error calculating averages:', error);
+    throw error;
+  }
+};
+
+
 //shift tons data 
 
 

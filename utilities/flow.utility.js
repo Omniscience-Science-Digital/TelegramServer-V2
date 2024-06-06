@@ -1,4 +1,4 @@
-const { getFlowValues,getPlcFlowValues } = require('../repositories/postgress_repository');
+const { getFlowValues,getPlcFlowValues,getPlcCycloneValues } = require('../repositories/postgress_repository');
 const { generateAndSaveLineChart } = require('../helpers/charts/chart_helper');
 
 module.exports.flowutility = async (startTime, endTime, startdate, enddate, scales, canvas) => {
@@ -96,30 +96,22 @@ module.exports.flowDataPLC = async(startTime, endTime,startdate,enddate, plcflow
 
 
 
-module.exports.cycloneDataPLC = async(shift,cycloneArray,startTime, endTime,canvas,plcIccid)=>{
+module.exports.cycloneDataPLC = async(postgress_start, postgress_end, startdate, enddate, cyclonegraph, canvas,plcIccid)=>{
 
+    
     // // Use Promise.all for parallel processing
-    const reportPromises = cycloneArray.map(async (scale) => {
+    const reportPromises = cyclonegraph.map(async (scale) => {
     const key = Object.keys(scale)[0];
     const title = scale[key];
 
   
     try {
         
-        let myflowData;
+        let myflowData = await getPlcCycloneValues(postgress_start, postgress_end, startdate, enddate,title, plcIccid);
 
-        if(shift ==='night')
-        {
-             myflowData =await reportServicePLC.geteveningFlow(startTime, endTime, title,plcIccid);
-
-        }
-        else if(shift ==='day') {
-
-             myflowData =await reportServicePLC.getDayFlow(startTime, endTime, title,plcIccid);
-        }
+   
 
         
-
         return { key, data: myflowData };  // Use key instead of iccid
     } catch (error) {
         // Log or handle individual errors
@@ -131,7 +123,7 @@ module.exports.cycloneDataPLC = async(shift,cycloneArray,startTime, endTime,canv
     // Wait for all promises to resolve
     var flowDataArray = await Promise.all(reportPromises);
 
-    var flowImage = await generateAndSaveLineChart("flow2",flowDataArray,canvas,startTime,endTime)
+    var flowImage = await generateAndSaveLineChart("flow2",flowDataArray,canvas,postgress_start,postgress_end)
 
 
     return flowImage;

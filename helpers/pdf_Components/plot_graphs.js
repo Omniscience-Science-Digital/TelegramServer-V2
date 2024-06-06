@@ -1,5 +1,5 @@
 
-async function generateflowShifttonsGraph(doc, flowBuffer,  flowheight, shiftheight) {
+async function generateflowShifttonsGraph(doc, flowBuffer,cyclonebuffer, flowheight, shiftheight) {
 
 
     if (flowBuffer) {
@@ -9,15 +9,15 @@ async function generateflowShifttonsGraph(doc, flowBuffer,  flowheight, shifthei
       return;
     }
   
-    // if (cyclonebuffer) {
-    //   doc.image(cyclonebuffer, 50, shiftheight, { width: 500 });
-    // }
-    // else {
+    if (cyclonebuffer) {
+      doc.image(cyclonebuffer, 50, shiftheight, { width: 500 });
+    }
+    else {
   
       doc.image("./assets/shift.png", 23, shiftheight, { width: 550, height: 190 })
         .fillColor("#61677A")
         .moveDown();
-  //  }
+   }
   
   
   

@@ -83,6 +83,45 @@ module.exports.scanDynamoDBTableDay = async function (dayStop) {
   }
 }
 
+
+module.exports.scanDynamoDBTableExtraShift = async function (extraShiftStop) {
+  try {
+    const [reports,scales] = await Promise.all([
+      scanDynamoDBTableWithExtraTime(extraShiftStop),
+      getScales()
+    ]);
+
+
+
+
+    const scalesMap = scales.reduce((acc, scale) => {
+      if (!acc[scale.telegramreportID.S]) {
+        acc[scale.telegramreportID.S] = [];
+      }
+      acc[scale.telegramreportID.S].push(scale);
+      return acc;
+    }, {});
+
+    const linkedReports = reports.map(report => {
+      const reportId = report.id.S;
+    
+
+
+      if (scalesMap[reportId]) {
+        report.Telegramscales = scalesMap[reportId];
+      }
+
+      return report;
+    });
+
+
+
+    return linkedReports;
+  } catch (error) {
+    console.error('Error fetching or linking data:', error);
+  }
+}
+
 const scanDynamoDBTableWithNight = async (nightstop) => {
   try {
     const filterExpression = '#nightStop = :stopTime AND sitestatus = :status';
@@ -138,6 +177,34 @@ const scanDynamoDBTableWithTime = async (dayStop) => {
     throw err;
   }
 };
+
+const scanDynamoDBTableWithExtraTime = async (extraShiftStop) => {
+  try {
+    const filterExpression = '#extraShiftStop = :stopTime AND sitestatus = :status';
+    const expressionAttributeValues = {
+      ':stopTime': { S: extraShiftStop },
+      ':status': { BOOL: true }
+    };
+
+    const params = {
+      TableName: reporttable,
+      FilterExpression: filterExpression,
+      ExpressionAttributeNames: {
+        '#extraShiftStop': 'extraShiftStop'
+      },
+      ExpressionAttributeValues: expressionAttributeValues
+    };
+
+    const data = await client.send(new ScanCommand(params));
+    // console.log('Scan DynamoDB Result:', data.Items); // Log scan result for debugging
+
+    return data.Items;
+  } catch (err) {
+    console.error('Error scanning DynamoDB table:', err);
+    throw err;
+  }
+};
+
 
 async function getScales() {
   const params = {
