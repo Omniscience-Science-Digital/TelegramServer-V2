@@ -46,10 +46,10 @@ app.use((err,req,res,next)=>{
     res.status(500).send('Something went wrong !')
 })
 
-
-app.listen(port,()=>{
-    console.log(`Running on port : ${port}`)
-})
-
+// Start server and listen on all network interfaces
+app.listen(port, '0.0.0.0', () => {
+    console.log(`Running on port: ${port}`);
+  });
+  
 
 
