@@ -4,7 +4,7 @@ const db = require('../configs/postgress_db');
 
 //shifttons 
 
-const shiftTons = async (startTime, endTime, startdate, enddate, iccid) => {
+const shiftTons = async (startTime, endTime, startdate, enddate, iccid,modbus_key) => {
   try {
 
     let query;
@@ -48,7 +48,7 @@ const shiftTons = async (startTime, endTime, startdate, enddate, iccid) => {
               FROM
               public.devicelogs_production_${iccid}
               WHERE
-              (datasourcekey = 'modbus-1-0' OR datasourcekey = 'modbus-17-0') 
+              ${modbus_key}
               AND date BETWEEN '${startdate} ${startTime}' AND '${enddate} ${endTime}'
               )
               SELECT
@@ -61,7 +61,7 @@ const shiftTons = async (startTime, endTime, startdate, enddate, iccid) => {
 
     }
 
-
+    
 
     const result = await db.query(query);
 
@@ -122,7 +122,7 @@ const shiftTonsplc = async (startTime, endTime, startdate, enddate, title,plcIcc
 };
 
 
-const startingHourtons = async ( startTime, endTime, startdate, enddate, iccid) => {
+const startingHourtons = async ( startTime, endTime, startdate, enddate, iccid,modbus_key) => {
 
   // Split the startTime string into hours and minutes
   const [startHour, startMinute] = endTime.split(':');
@@ -149,121 +149,7 @@ const startingHourtons = async ( startTime, endTime, startdate, enddate, iccid) 
   let query;
   try {
 
-    // if (iccid === '8944501412219744671') {
-    //   query = `
-    //   WITH ranked_data AS (
-    //     SELECT
-    //         iccid,
-    //         title,
-    //         value,
-    //         date,
-    //         ROW_NUMBER() OVER (PARTITION BY EXTRACT(HOUR FROM date) ORDER BY date ASC) AS row_num
-    //     FROM
-    //        public.devicelogs_production_8944501412219744671
-    //     WHERE
-    //      title = 'Totalizer1'
-    //      AND date BETWEEN '${startdate} ${startTime}' AND '${enddate} ${endTime}'
-    // )
-    // SELECT
-    //     iccid,
-    //     title,
-    //     value as hourly_tons,
-    //     date
-    // FROM
-    //     ranked_data
-    // WHERE
-    //     row_num = 1
-    // ORDER BY
-    //     date;
-    // `;
-
-
-    // } else if (startTime === originalendTime) {
-    //   query = `
-    //   WITH ranked_data AS (
-    //     (
-    //         SELECT
-    //             iccid,
-    //             title,
-    //             value,
-    //             date,
-    //             ROW_NUMBER() OVER (PARTITION BY EXTRACT(HOUR FROM date) ORDER BY date ASC) AS row_num
-    //         FROM
-    //            public.devicelogs_production_${iccid}
-    //         WHERE
-    //             (datasourcekey = 'modbus-1-0' OR datasourcekey = 'modbus-17-0')
-    //      AND date BETWEEN '${startdate} ${startTime}' AND '${enddate} ${endTime}'
-        
-    //     )
-    //     UNION ALL
-    //     (
-    //         SELECT
-    //             iccid,
-    //             title,
-    //             value,
-    //             date,
-    //             ROW_NUMBER() OVER (PARTITION BY EXTRACT(HOUR FROM date) ORDER BY date ASC) AS row_num
-    //         FROM
-               
-    //        public.devicelogs_production_${iccid}
-    //         WHERE
-    //             (datasourcekey = 'modbus-1-0' OR datasourcekey = 'modbus-17-0')
-    //             AND date BETWEEN  timestamp  '${enddate} ${startTime}' AND  timestamp  '${enddate} ${endTime}' + interval '5 minutes'
-        
-        
-        
-    //     )
-    // )
-    // SELECT
-    //     iccid,
-    //     title,
-    //     value as hourly_tons,
-    //     date
-    // FROM
-    //     ranked_data
-    // WHERE
-    //     row_num = 1
-    // ORDER BY
-    //     date;
-    
-     
-    //   `;
-
-
-
-    // } else {
-
-    //   query = `
-    //   WITH ranked_data AS (
-    //     SELECT
-    //         iccid,
-    //         title,
-    //         value,
-    //         date,
-    //         ROW_NUMBER() OVER (PARTITION BY EXTRACT(HOUR FROM date) ORDER BY date ASC) AS row_num
-    //     FROM
-    //     public.devicelogs_production_${iccid}
-    //     WHERE
-    //     (datasourcekey = 'modbus-1-0' OR datasourcekey = 'modbus-17-0')
-    //     AND date BETWEEN '${startdate} ${startTime}' AND '${enddate} ${endTime}'
-    // )
-    // SELECT
-    //     iccid,
-    //     title,
-    //     value as hourly_tons,
-    //     date
-    // FROM
-    //     ranked_data
-    // WHERE
-    //     row_num = 1
-    // ORDER BY
-    //     date;
-    //   `;
-
-
-    // }
-
-
+   
     query=`WITH ranked_data AS (
       SELECT
           iccid,
@@ -274,7 +160,8 @@ const startingHourtons = async ( startTime, endTime, startdate, enddate, iccid) 
       FROM
       public.devicelogs_production_${iccid}
       WHERE
-      (datasourcekey = 'modbus-1-0' OR datasourcekey = 'modbus-17-0')
+      
+      ${modbus_key}
       AND date BETWEEN '${startdate} ${startTime}' AND '${enddate} ${endTime}'
   ),
   latest_value AS (
@@ -297,7 +184,8 @@ const startingHourtons = async ( startTime, endTime, startdate, enddate, iccid) 
       FROM
       public.devicelogs_production_${iccid}
       WHERE
-      (datasourcekey = 'modbus-1-0' OR datasourcekey = 'modbus-17-0')
+      
+      ${modbus_key}
       AND date BETWEEN '${startdate} ${startTime}' AND '${enddate} ${endTime}'
       ORDER BY
           date ASC
@@ -321,6 +209,8 @@ const startingHourtons = async ( startTime, endTime, startdate, enddate, iccid) 
   ORDER BY
       date;`;
 
+
+     
 
     const result = await db.query(query);
 
@@ -466,12 +356,27 @@ exports.hourlyShifttons = async (shift, startTime, endTime, startdate, enddate, 
   try {
 
 
+    var modbus_key= `(datasourcekey = 'modbus-1-0' OR datasourcekey = 'modbus-17-0')`;
     //for period shift tons
-    const Shifttons = await shiftTons(startTime, endTime, startdate, enddate, iccid);
+    let Shifttons = await shiftTons(startTime, endTime, startdate, enddate, iccid,modbus_key);
+
+    let myData = await startingHourtons( startTime, endTime, startdate, enddate, iccid,modbus_key);
+
+    if(Shifttons)
+      {
+        if(parseFloat(Shifttons[0])<0)
+          {
+            var modbus_key= `(datasourcekey = 'modbus-1-13')`;
+            Shifttons = await shiftTons(startTime, endTime, startdate, enddate, iccid,modbus_key);
+            myData = await startingHourtons( startTime, endTime, startdate, enddate, iccid,modbus_key);
+            
+
+          }
+          
+
+      }
 
 
-    //hourly Shift tons
-    const myData = await startingHourtons( startTime, endTime, startdate, enddate, iccid);
 
 
 
