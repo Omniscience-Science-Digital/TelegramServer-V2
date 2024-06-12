@@ -148,7 +148,7 @@ module.exports.drawHeaderRectangles = (doc, reportHeaderRenames, reportDataArray
 
       if (!uniqueheaderKeys.has(startkey)) {
         if (key === 'yield') {
-          formulaData.push([{ text: 'MTD Yield:', width: 0.54 }, { text: ' ' + value + ' tons', width: 0.7 }]);
+          formulaData.push([{ text: 'MTD Yield:', width: 0.54 }, { text: ' ' + value + ' %', width: 0.7 }]);
           uniqueheaderKeys.add(startkey);
         }
       }
@@ -164,7 +164,7 @@ module.exports.drawHeaderRectangles = (doc, reportHeaderRenames, reportDataArray
 
       if (!uniqueheaderKeys.has(startkey)) {
         if (key === 'balance') {
-          formulaData.push([{ text: 'MTD Balance:', width: 0.54 }, { text: ' ' + value + ' tons', width: 0.7 }]);
+          formulaData.push([{ text: 'MTD Balance:', width: 0.54 }, { text: ' ' + value + ' %', width: 0.7 }]);
           uniqueheaderKeys.add(startkey);
         }
       }
@@ -254,7 +254,7 @@ module.exports.drawHeaderRectangles = (doc, reportHeaderRenames, reportDataArray
         if (exists|| startkey==='yield') {
 
           uniqueheaderKeys.add(startkey);
-          formulaData.push([{ text: `MTD  ${key}`, width: 0.54 }, { text: ' ' + value + ' tons', width: 0.7 }])
+          formulaData.push([{ text: `MTD  ${key}`, width: 0.54 }, { text: ' ' + value + ' %', width: 0.7 }])
         }
 
       }

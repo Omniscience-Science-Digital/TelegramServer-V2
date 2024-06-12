@@ -18,6 +18,7 @@ module.exports.singleScale = async (startTime, endTime, scales, monthstart, shif
         var postgress_end = subtractTwoHours(endTime);
 
         //get start and  end data 
+    
 
         let startdate = (shift === 'day') ? getCurrentDateFormatted() : getPreviousDateFormatted();
         let enddate = getCurrentDateFormatted();

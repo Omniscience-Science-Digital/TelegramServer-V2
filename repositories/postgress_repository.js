@@ -122,10 +122,12 @@ const shiftTonsplc = async (startTime, endTime, startdate, enddate, title,plcIcc
 };
 
 
-const startingHourtons = async (shift, startTime, endTime, startdate, enddate, iccid) => {
+const startingHourtons = async ( startTime, endTime, startdate, enddate, iccid) => {
 
   // Split the startTime string into hours and minutes
   const [startHour, startMinute] = endTime.split(':');
+
+  
 
   // Convert the hours and minutes to numbers
   const hour = parseInt(startHour, 10);
@@ -143,124 +145,181 @@ const startingHourtons = async (shift, startTime, endTime, startdate, enddate, i
   endTime = `${newHour < 10 ? '0' : ''}${newHour}:${minute < 10 ? '0' : ''}${minute}`;
 
 
+
   let query;
   try {
 
-    if (iccid === '8944501412219744671') {
-      query = `
-      WITH ranked_data AS (
-        SELECT
-            iccid,
-            title,
-            value,
-            date,
-            ROW_NUMBER() OVER (PARTITION BY EXTRACT(HOUR FROM date) ORDER BY date ASC) AS row_num
-        FROM
-           public.devicelogs_production_8944501412219744671
-        WHERE
-         title = 'Totalizer1'
-         AND date BETWEEN '${startdate} ${startTime}' AND '${enddate} ${endTime}'
-    )
-    SELECT
-        iccid,
-        title,
-        value as hourly_tons,
-        date
-    FROM
-        ranked_data
-    WHERE
-        row_num = 1
-    ORDER BY
-        date;
-    `;
+    // if (iccid === '8944501412219744671') {
+    //   query = `
+    //   WITH ranked_data AS (
+    //     SELECT
+    //         iccid,
+    //         title,
+    //         value,
+    //         date,
+    //         ROW_NUMBER() OVER (PARTITION BY EXTRACT(HOUR FROM date) ORDER BY date ASC) AS row_num
+    //     FROM
+    //        public.devicelogs_production_8944501412219744671
+    //     WHERE
+    //      title = 'Totalizer1'
+    //      AND date BETWEEN '${startdate} ${startTime}' AND '${enddate} ${endTime}'
+    // )
+    // SELECT
+    //     iccid,
+    //     title,
+    //     value as hourly_tons,
+    //     date
+    // FROM
+    //     ranked_data
+    // WHERE
+    //     row_num = 1
+    // ORDER BY
+    //     date;
+    // `;
 
 
-    } else if (startTime === originalendTime) {
-      query = `
-      WITH ranked_data AS (
-        (
-            SELECT
-                iccid,
-                title,
-                value,
-                date,
-                ROW_NUMBER() OVER (PARTITION BY EXTRACT(HOUR FROM date) ORDER BY date ASC) AS row_num
-            FROM
-               public.devicelogs_production_${iccid}
-            WHERE
-                (datasourcekey = 'modbus-1-0' OR datasourcekey = 'modbus-17-0')
-         AND date BETWEEN '${startdate} ${startTime}' AND '${enddate} ${endTime}'
+    // } else if (startTime === originalendTime) {
+    //   query = `
+    //   WITH ranked_data AS (
+    //     (
+    //         SELECT
+    //             iccid,
+    //             title,
+    //             value,
+    //             date,
+    //             ROW_NUMBER() OVER (PARTITION BY EXTRACT(HOUR FROM date) ORDER BY date ASC) AS row_num
+    //         FROM
+    //            public.devicelogs_production_${iccid}
+    //         WHERE
+    //             (datasourcekey = 'modbus-1-0' OR datasourcekey = 'modbus-17-0')
+    //      AND date BETWEEN '${startdate} ${startTime}' AND '${enddate} ${endTime}'
         
-        )
-        UNION ALL
-        (
-            SELECT
-                iccid,
-                title,
-                value,
-                date,
-                ROW_NUMBER() OVER (PARTITION BY EXTRACT(HOUR FROM date) ORDER BY date ASC) AS row_num
-            FROM
+    //     )
+    //     UNION ALL
+    //     (
+    //         SELECT
+    //             iccid,
+    //             title,
+    //             value,
+    //             date,
+    //             ROW_NUMBER() OVER (PARTITION BY EXTRACT(HOUR FROM date) ORDER BY date ASC) AS row_num
+    //         FROM
                
-           public.devicelogs_production_${iccid}
-            WHERE
-                (datasourcekey = 'modbus-1-0' OR datasourcekey = 'modbus-17-0')
-                AND date BETWEEN  timestamp  '${enddate} ${startTime}' AND  timestamp  '${enddate} ${endTime}' + interval '5 minutes'
+    //        public.devicelogs_production_${iccid}
+    //         WHERE
+    //             (datasourcekey = 'modbus-1-0' OR datasourcekey = 'modbus-17-0')
+    //             AND date BETWEEN  timestamp  '${enddate} ${startTime}' AND  timestamp  '${enddate} ${endTime}' + interval '5 minutes'
         
         
         
-        )
-    )
-    SELECT
-        iccid,
-        title,
-        value as hourly_tons,
-        date
-    FROM
-        ranked_data
-    WHERE
-        row_num = 1
-    ORDER BY
-        date;
+    //     )
+    // )
+    // SELECT
+    //     iccid,
+    //     title,
+    //     value as hourly_tons,
+    //     date
+    // FROM
+    //     ranked_data
+    // WHERE
+    //     row_num = 1
+    // ORDER BY
+    //     date;
     
      
-      `;
+    //   `;
 
 
 
-    } else {
+    // } else {
 
-      query = `
-      WITH ranked_data AS (
-        SELECT
-            iccid,
-            title,
-            value,
-            date,
-            ROW_NUMBER() OVER (PARTITION BY EXTRACT(HOUR FROM date) ORDER BY date ASC) AS row_num
-        FROM
-        public.devicelogs_production_${iccid}
-        WHERE
-        (datasourcekey = 'modbus-1-0' OR datasourcekey = 'modbus-17-0')
-        AND date BETWEEN '${startdate} ${startTime}' AND '${enddate} ${endTime}'
-    )
-    SELECT
-        iccid,
-        title,
-        value as hourly_tons,
-        date
-    FROM
-        ranked_data
-    WHERE
-        row_num = 1
-    ORDER BY
-        date;
-      `;
-
-
-    }
+    //   query = `
+    //   WITH ranked_data AS (
+    //     SELECT
+    //         iccid,
+    //         title,
+    //         value,
+    //         date,
+    //         ROW_NUMBER() OVER (PARTITION BY EXTRACT(HOUR FROM date) ORDER BY date ASC) AS row_num
+    //     FROM
+    //     public.devicelogs_production_${iccid}
+    //     WHERE
+    //     (datasourcekey = 'modbus-1-0' OR datasourcekey = 'modbus-17-0')
+    //     AND date BETWEEN '${startdate} ${startTime}' AND '${enddate} ${endTime}'
+    // )
+    // SELECT
+    //     iccid,
+    //     title,
+    //     value as hourly_tons,
+    //     date
+    // FROM
+    //     ranked_data
+    // WHERE
+    //     row_num = 1
+    // ORDER BY
+    //     date;
+    //   `;
 
 
+    // }
+
+
+    query=`WITH ranked_data AS (
+      SELECT
+          iccid,
+          title,
+          value,
+          date,
+          ROW_NUMBER() OVER (PARTITION BY DATE_TRUNC('hour', date) ORDER BY date DESC) AS row_num
+      FROM
+      public.devicelogs_production_${iccid}
+      WHERE
+      (datasourcekey = 'modbus-1-0' OR datasourcekey = 'modbus-17-0')
+      AND date BETWEEN '${startdate} ${startTime}' AND '${enddate} ${endTime}'
+  ),
+  latest_value AS (
+      SELECT
+          iccid,
+          title,
+          value,
+          date
+      FROM
+          ranked_data
+      WHERE
+          row_num = 1
+  ),
+  first_value AS (
+      SELECT
+          iccid,
+          title,
+          value,
+          date
+      FROM
+      public.devicelogs_production_${iccid}
+      WHERE
+      (datasourcekey = 'modbus-1-0' OR datasourcekey = 'modbus-17-0')
+      AND date BETWEEN '${startdate} ${startTime}' AND '${enddate} ${endTime}'
+      ORDER BY
+          date ASC
+      LIMIT 1
+  )
+  SELECT
+      iccid,
+      title,
+      value AS hourly_tons,
+      date
+  FROM
+      first_value
+  UNION ALL
+  SELECT
+      iccid,
+      title,
+      value AS hourly_tons,
+      date
+  FROM
+      latest_value
+  ORDER BY
+      date;`;
 
 
     const result = await db.query(query);
@@ -412,7 +471,7 @@ exports.hourlyShifttons = async (shift, startTime, endTime, startdate, enddate, 
 
 
     //hourly Shift tons
-    const myData = await startingHourtons(shift, startTime, endTime, startdate, enddate, iccid);
+    const myData = await startingHourtons( startTime, endTime, startdate, enddate, iccid);
 
 
 
@@ -548,7 +607,7 @@ exports.getPlcFlowValues = async (startTime, endTime, startdate, enddate, title,
     FROM
     public.devicelogs_production_${plcIccid}
     WHERE
-    title='${title}'
+    datasourcekey='${title}'
     AND date BETWEEN '${startdate} ${startTime}' AND '${enddate} ${endTime}'
     ORDER BY
         date ASC;      
@@ -582,7 +641,7 @@ exports.getPlcCycloneValues = async (startTime, endTime, startdate, enddate, tit
     FROM
     public.devicelogs_production_${plcIccid}
     WHERE
-    title='${title}'
+    datasourcekey='${title}'
     AND date BETWEEN '${startdate} ${startTime}' AND '${enddate} ${endTime}'
     ORDER BY
         date ASC;      
@@ -885,7 +944,8 @@ exports.ActualPlcStart = async (startTime, endTime, startdate, enddate, plcIccid
           FROM
           public.devicelogs_production_${plcIccid}
           WHERE
-          title='${flowtitle}'
+          datasourcekey='${flowtitle}'
+          
           AND date BETWEEN '${startdate} ${startTime}' AND '${enddate} ${endTime}'
         )
         SELECT
@@ -935,7 +995,7 @@ exports.ActualPlcEnd = async (startTime, endTime, startdate, enddate, plcIccid, 
         FROM
         public.devicelogs_production_${plcIccid}
         WHERE
-          title='${flowtitle}'
+        datasourcekey='${flowtitle}'
           AND date BETWEEN '${startdate} ${startTime}' AND '${enddate} ${endTime}'
     )
     SELECT
@@ -1037,7 +1097,7 @@ exports.plcScaleFlow = async (startTime, endTime, startdate, enddate, iccid, tit
             FROM
             public.devicelogs_production_${iccid}
             WHERE
-            title='${title}'
+         datasourcekey='${title}'
             AND date BETWEEN '${startdate} ${startTime}' AND '${enddate} ${endTime}'
         ),
         Above10Values AS (
@@ -1048,7 +1108,7 @@ exports.plcScaleFlow = async (startTime, endTime, startdate, enddate, iccid, tit
             FROM
             public.devicelogs_production_${iccid}
             WHERE
-            title='${title}'
+            datasourcekey='${title}'
                 AND value::numeric > ${running_tph}
                 AND date BETWEEN '${startdate} ${startTime}' AND '${enddate} ${endTime}'
         )
@@ -1069,7 +1129,7 @@ exports.plcScaleFlow = async (startTime, endTime, startdate, enddate, iccid, tit
         
         `;
 
-
+ 
     const result = await db.query(query);
 
     // Extract the "shifttons" value from the rows
@@ -1153,7 +1213,7 @@ exports.runtimePlcFlow = async (startTime, endTime, startdate, enddate, plcIccid
             FROM
             public.devicelogs_production_${plcIccid}
             WHERE
-            title='${flowtitle}'
+            datasourcekey='modbus-1-4'
             AND date BETWEEN '${startdate} ${startTime}' AND '${enddate} ${endTime}'
         )
         SELECT

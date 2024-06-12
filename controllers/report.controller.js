@@ -57,6 +57,10 @@ exports.runReportdata = async (req, res) => {
                 endTime = item.nightStop?.S || '';
             }
 
+                  //check if report runs 24 hours
+
+        var fullday =(startTime===endTime)?true:false;
+
 
             chatId = item.telegramid?.S || '';
             runtime = item.runtime?.N;
@@ -125,7 +129,7 @@ exports.runReportdata = async (req, res) => {
             
             await headers_helper(shift,reportDataArray,monthstart,endTime,startTime)
 
-            await populateObjects(reportDataArray,chatId, sitename,reportHeaderRenames);
+            await populateObjects(reportDataArray,chatId, sitename,reportHeaderRenames,fullday);
         }
     } catch (error) {
         console.error('Error in reportdata:', error); // Log the error

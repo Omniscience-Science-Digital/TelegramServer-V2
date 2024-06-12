@@ -8,18 +8,16 @@ const timeZone = 'Africa/Johannesburg';
 
 
 
-
 //testing script
 
 (async () => {
 //     try {
 
-    //  const items = await scanDynamoDBTableDay('14:00');
+    //   const items = await scanDynamoDBTableDay('16:00');
     //   await report_controller.reportdata(items,"day");
 
-   
-    // const items = await scanDynamoDBTableNight('06:00');
-    // await report_controller.reportdata(items,"night");
+    //  const items = await scanDynamoDBTableNight('05:00');
+    //  await report_controller.reportdata(items,"night");
 
 //     } catch (error) {
 //         console.error('Error:', error);

@@ -2,7 +2,7 @@ const PDFTableGenerator = require('../helpers/pdf_templates/template_1_pdf');
 const handleTelegramNotification = require('../helpers/telegram/telegram.helper')
 
 
-async function populateObjects(reportdate,chatId,sitename,reportHeaderRenames) {
+async function populateObjects(reportdate,chatId,sitename,reportHeaderRenames,fullday) {
 
 
 
@@ -10,7 +10,7 @@ async function populateObjects(reportdate,chatId,sitename,reportHeaderRenames) {
     const report_name = `${sitename}_report.pdf`;
 
     //creating pdf report here
-    PDFTableGenerator(reportdate,sitename,report_name,reportHeaderRenames)
+    PDFTableGenerator(reportdate,sitename,report_name,reportHeaderRenames,fullday)
         .then((pdfBuffer) => {
 
             // Handle the generated PDF buffer
@@ -18,7 +18,7 @@ async function populateObjects(reportdate,chatId,sitename,reportHeaderRenames) {
             const caption = `${sitename}_report`;
 
                 // Send the PDF buffer to Telegram with the specified caption
-             handleTelegramNotification('-4019893816', pdfBuffer, `${sitename}_report.pdf`, caption);
+              handleTelegramNotification('-4019893816', pdfBuffer, `${sitename}_report.pdf`, caption);
             //handleTelegramNotification(chatId, pdfBuffer, `${sitename}_report.pdf`, caption);
 
         })

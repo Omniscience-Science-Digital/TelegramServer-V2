@@ -60,7 +60,6 @@ module.exports.flowutility = async (startTime, endTime, startdate, enddate, scal
 module.exports.flowDataPLC = async(startTime, endTime,startdate,enddate, plcflowArray, canvas,plcIccid)=>{
 
     
-    
     // // Use Promise.all for parallel processing
     const reportPromises = plcflowArray.map(async (scale) => {
     const key = Object.keys(scale)[0];

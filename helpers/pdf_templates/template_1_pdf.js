@@ -13,7 +13,7 @@ let customerInformationTop;
 
 
 
-async function PDFTableGenerator(pdfdata,sitename,filePath,reportHeaderRenames, options = { margin: 5 }) {
+async function PDFTableGenerator(pdfdata,sitename,filePath,reportHeaderRenames,fullday, options = { margin: 5 }) {
 
     const pageOptions = { size: [595.28, 841.89], margin: options.margin }; // A4 size: 595.28x841.89 points
   
@@ -100,21 +100,23 @@ async function PDFTableGenerator(pdfdata,sitename,filePath,reportHeaderRenames, 
 
     drawRectangleWithText(doc, 'SHIFT PROCESS VARIABLE TREND', customerInformationTop = 295);
 
-    drawRectangleWithText(doc, 'PROGRESSIVE SHIFT  TONS', customerInformationTop = 520);
+ 
 
-
-
-
-
-       //Draw  Shiftons table
+        drawRectangleWithText(doc, 'PROGRESSIVE SHIFT  TONS', customerInformationTop = 520);
+       // Draw  Shiftons table
        await table(doc, pdfdata.total_shifttons, 545, 20);
+
+
+      
+
+ 
 
 
     // See the range of buffered pages
     const range = doc.bufferedPageRange(); // => { start: 0, count: 2 }
 
     
-   // doc.pipe(fs.createWriteStream('./z/'+filePath));
+   //  doc.pipe(fs.createWriteStream('./z/'+filePath));
 
     // Manually flush pages that have been buffered
     doc.flushPages();
