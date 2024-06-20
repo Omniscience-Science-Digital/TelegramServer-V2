@@ -13,10 +13,19 @@ const timeZone = 'Africa/Johannesburg';
 (async () => {
 //     try {
 
-    //   const items = await scanDynamoDBTableDay('16:00');
+
+    // const items = await scanDynamoDBTableDay('22:00');
+    // //extrashift items
+    // const extrashiftitems =await scanDynamoDBTableExtraShift('22:00') 
+
+    // await report_controller.reportdata(items,"day");
+    // await report_controller.reportdataeXtraShift(extrashiftitems,"day");
+
+
+    //   const items = await scanDynamoDBTableDay('22:00');
     //   await report_controller.reportdata(items,"day");
 
-    //  const items = await scanDynamoDBTableNight('05:00');
+    //  const items = await scanDynamoDBTableNight('02:00');
     //  await report_controller.reportdata(items,"night");
 
 //     } catch (error) {
@@ -76,11 +85,12 @@ cron.schedule('0 22 * * *', async () => {
 
     const items = await scanDynamoDBTableDay('22:00');
     //extrashift items
-    const extrashiftitems =await scanDynamoDBTableExtraShift('22:00')
+    const extrashiftitems =await scanDynamoDBTableExtraShift('22:00') 
 
-    let combinedItems = items.concat(extrashiftitems);
+    await report_controller.reportdata(items,"day");
+    await report_controller.reportdataeXtraShift(extrashiftitems,"day");
 
-    await report_controller.reportdata(combinedItems,"day");
+
 
 }, { timezone: timeZone });
 
