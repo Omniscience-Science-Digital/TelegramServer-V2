@@ -27,6 +27,7 @@ exports.runReportdata = async (req, res) => {
 
     let sites =items;
 
+    console.log(shift)
 
     try {
         // Destructure sites
@@ -55,7 +56,11 @@ exports.runReportdata = async (req, res) => {
             } else if (shift === 'night') {
                 startTime = item.nightStart?.S || '';
                 endTime = item.nightStop?.S || '';
-            }
+            }else if (shift === 'extradayshift') 
+                {
+                    startTime = item.extraShiftStart?.S || '';
+                    endTime = item.extraShiftStop?.S || '';
+                }
 
                   //check if report runs 24 hours
 
@@ -73,6 +78,8 @@ exports.runReportdata = async (req, res) => {
             runningtph = item.runningtph?.N || '';
             maxUtilization = item.maxUtilization?.N || '';
             plcIccid = item.plcIccid?.S || '';
+
+            const chartIDTest ='-4019893816';
 
 
 
@@ -129,7 +136,7 @@ exports.runReportdata = async (req, res) => {
             
             await headers_helper(shift,reportDataArray,monthstart,endTime,startTime)
 
-            await populateObjects(reportDataArray,chatId, sitename,reportHeaderRenames,fullday);
+           await populateObjects(reportDataArray,chartIDTest, sitename,reportHeaderRenames,fullday);
         }
     } catch (error) {
         console.error('Error in reportdata:', error); // Log the error

@@ -113,10 +113,10 @@ async function PDFTableGenerator(pdfdata,sitename,filePath,reportHeaderRenames,f
 
 
     // See the range of buffered pages
-    const range = doc.bufferedPageRange(); // => { start: 0, count: 2 }
+   // const range = doc.bufferedPageRange(); // => { start: 0, count: 2 }
 
     
-   //  doc.pipe(fs.createWriteStream('./z/'+filePath));
+     doc.pipe(fs.createWriteStream('./z/'+filePath));
 
     // Manually flush pages that have been buffered
     doc.flushPages();
