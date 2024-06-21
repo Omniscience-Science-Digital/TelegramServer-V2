@@ -18,6 +18,8 @@ app.use(cors({
     credentials:true
 }))
 
+// Handle preflight requests
+app.options('*', cors());
 
 //logging middleware 
 app.use((req,res,next)=>{
