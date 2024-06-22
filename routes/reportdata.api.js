@@ -10,5 +10,9 @@ const mqttController = require('../controllers/mqtt.controller')
 router.post('/webhooktrigger', reportController.runReportdata)
 router.post('/mqttTrigger', mqttController.Mqttcontroller)
 
+router.get('/', (req, res) => {
+    res.send('Omniscience Digital');
+});
+
 
 module.exports=router

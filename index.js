@@ -1,7 +1,8 @@
-const express = require('express')
-const cors = require('cors')
-const compression = require('compression')
-const routes = require("./routes/api.route")
+const http = require('http');
+const express = require('express');
+const cors = require('cors');
+const compression = require('compression');
+const routes = require("./routes/api.route");
 const app = express();
 
 //Server Port 
@@ -49,7 +50,7 @@ app.use((err,req,res,next)=>{
 })
 
 // Start server and listen on all network interfaces
-app.listen(port, '0.0.0.0', () => {
+http.createServer().listen(port, '0.0.0.0', () => {
     console.log(`Running on port: ${port}`);
   });
   
