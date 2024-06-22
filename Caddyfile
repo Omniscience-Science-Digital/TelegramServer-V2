@@ -1,6 +1,6 @@
-example.com {
-
-  reverse_proxy node-app:5001  {
-    header_down Strict-Transport-Security max-age=31536000;
-   }
-}
+13.246.188.15 {
+    reverse_proxy app:5001 {
+      header_down Strict-Transport-Security max-age=31536000;
+    }
+  }
+  
