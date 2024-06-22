@@ -1,3 +1,4 @@
+version: '3'
 services:
   app:
     build: .
@@ -15,8 +16,8 @@ services:
       - "80:80"
       - "443:443"
     volumes:            
-      - $PWD/Caddyfile:/etc/caddy/Caddyfile
-      - $PWD/site:/srv
+      - /home/ubuntu/project/Caddyfile:/etc/caddy/Caddyfile
+      - /home/ubuntu/project/site:/srv
       - caddy_data:/data
       - caddy_config:/config
 
