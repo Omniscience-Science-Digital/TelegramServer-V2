@@ -7,7 +7,7 @@ echo "Composing down"
 sudo docker-compose down
 
 echo "Building application"
-sudo docker-compose up -d --build
+sudo docker-compose up  --build -d
 
 
 echo "Check if it's running"
