@@ -1,6 +1,5 @@
-13.246.188.15 {
+http://ec2-13-245-180-224.af-south-1.compute.amazonaws.com:5001 {
     reverse_proxy app:5001 {
-      header_down Strict-Transport-Security max-age=31536000;
+        header_down Strict-Transport-Security "max-age=31536000"
     }
-  }
-  
+}
