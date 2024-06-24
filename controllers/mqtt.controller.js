@@ -1,12 +1,11 @@
-const {processData} = require('../services/mqtt.service');
-
+const { processData } = require('../services/mqtt.service');
 
 
 
 exports.Mqttcontroller = async (req, res) => {
     try {
         // Access the id from the request body
-        const { csvData } = req.body;
+        const { csvData, adMapping, address } = req.body;
 
         let date;
         let iccid;
@@ -18,44 +17,46 @@ exports.Mqttcontroller = async (req, res) => {
             headerIndexMap[header] = index;
         });
 
-        // Mapping the columns to ad values
-        const adMapping = {
-            "Sample": 0.0,
-            "Ash": 1.0,
-            "Cal": 2.0,
-        };
+
+        // delete adMapping['Name'];
 
         let jsonResult = {
             "modbus-dev": {
-                "addr": 99.0,
+                "addr": address,
                 "pts": [],
             },
         };
 
-        let combinedResult =[];
+        let combinedResult = [];
+
         // Loop through each row in csvData (excluding headers)
-        for (let i = 1; i < csvData.length; i++) {
-            
+        for (let i = 1; i < csvData.length ; i++) {
+
             const row = csvData[i];
 
             //reset obj
             jsonResult = {
                 "modbus-dev": {
-                    "addr": 99.0,
+                    "addr": address,
                     "pts": [],
                 },
             };
 
-            // Populate jsonResult with data from row
-            for (const key in adMapping) {
+
+
+            for (let key in adMapping) {
+                if (key === "Name") {
+                    delete adMapping[key];
+                }
+
                 if (adMapping.hasOwnProperty(key)) {
-                    iccid = row[0]; // ICCID is the first element in each row
-                    date = row[1]; // Date is the second element in each row
+                    iccid = row[0];
+                    date = row[1];
 
                     const adValue = adMapping[key];
                     const columnIndex = headerIndexMap[key];
 
-                    if (columnIndex !== undefined) { // Ensure columnIndex is defined
+                    if (columnIndex !== undefined) {
                         jsonResult["modbus-dev"]["pts"].push({
                             "ad": adValue,
                             "rt": 3.0,
@@ -67,6 +68,8 @@ exports.Mqttcontroller = async (req, res) => {
                 }
             }
 
+
+
             if (date) {
                 let isoDate = new Date(date).toISOString();
                 jsonResult['date'] = isoDate;
@@ -77,19 +80,23 @@ exports.Mqttcontroller = async (req, res) => {
 
             combinedResult.push(databaseJson)
 
-  
+
         }
 
-   
+
         try {
-       
-            
+
+            // console.log(iccid)
+
+
             // Publish MQTT message
+            // await processData(combinedResult, '8944502408184345766');
              await processData(combinedResult, iccid);
         } catch (error) {
             console.error(`Error publishing MQTT message: ${error}`);
             throw error; // Optionally rethrow to propagate the error further
         }
+
 
 
         res.status(200).send('Data Published');

@@ -27,7 +27,6 @@ exports.runReportdata = async (req, res) => {
 
     let sites =items;
 
-    console.log(shift)
 
     try {
         // Destructure sites
