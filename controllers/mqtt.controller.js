@@ -12,6 +12,7 @@ exports.Mqttcontroller = async (req, res) => {
 
         const headers = csvData[0];
 
+
         const headerIndexMap = {};
         headers.forEach((header, index) => {
             headerIndexMap[header] = index;
@@ -30,9 +31,10 @@ exports.Mqttcontroller = async (req, res) => {
         let combinedResult = [];
 
         // Loop through each row in csvData (excluding headers)
-        for (let i = 1; i < csvData.length ; i++) {
+        for (let i = 1; i < csvData.length; i++) {
 
             const row = csvData[i];
+
 
             //reset obj
             jsonResult = {
@@ -50,7 +52,12 @@ exports.Mqttcontroller = async (req, res) => {
                 }
 
                 if (adMapping.hasOwnProperty(key)) {
-                    iccid = row[0];
+
+                    if (row[0]) {
+
+                        iccid = row[0];
+                    }
+
                     date = row[1];
 
                     const adValue = adMapping[key];
@@ -86,12 +93,13 @@ exports.Mqttcontroller = async (req, res) => {
 
         try {
 
-            // console.log(iccid)
+            console.log(iccid)
 
 
+            // console.log(combinedResult)
             // Publish MQTT message
-            // await processData(combinedResult, '8944502408184345766');
-             await processData(combinedResult, iccid);
+            // await processData(combinedResult, '7082229037010123040');
+            //await processData(combinedResult, iccid);
         } catch (error) {
             console.error(`Error publishing MQTT message: ${error}`);
             throw error; // Optionally rethrow to propagate the error further
