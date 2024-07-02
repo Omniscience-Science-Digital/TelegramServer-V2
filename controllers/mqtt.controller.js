@@ -92,14 +92,11 @@ exports.Mqttcontroller = async (req, res) => {
 
 
         try {
-
-            console.log(iccid)
-
-
+            
             // console.log(combinedResult)
             // Publish MQTT message
             // await processData(combinedResult, '7082229037010123040');
-            //await processData(combinedResult, iccid);
+            await processData(combinedResult, iccid);
         } catch (error) {
             console.error(`Error publishing MQTT message: ${error}`);
             throw error; // Optionally rethrow to propagate the error further
