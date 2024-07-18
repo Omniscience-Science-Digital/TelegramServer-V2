@@ -586,7 +586,7 @@ module.exports.flowtable = async (doc, dataArray, posY, posX) => {
   // Draw headers
   const headerArr = headers.map(header => ({
     text: '  ' + header,
-    width: header === 'Flow Variables' ? 0.105 : keyswidth, // Adjust the width as needed
+    width: header === 'Flow Variables' ? 0.115 : keyswidth, // Adjust the width as needed
   }));
 
 
