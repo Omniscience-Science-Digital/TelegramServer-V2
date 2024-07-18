@@ -43,8 +43,7 @@ async function seriescaleCalcsFunc(shift, shifts_Ran, startTime, endTime, flowti
 
         runtime = await runtimeFlowIccid(flowtitle, flowiccid, startTime, endTime, startdate, enddate, runningtph);
 
-
-
+     
 
 
         const sum_of_time_delta_in_hours = runtime[0]?.sum_of_time_delta_in_hours || 0;

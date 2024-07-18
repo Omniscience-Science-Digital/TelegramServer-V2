@@ -1,4 +1,4 @@
-const { getFlowValues,getPlcFlowValues,getPlcCycloneValues } = require('../repositories/postgress_repository');
+const { getFlowValues,getPlcFlowValues,getPlcCycloneValues,runtimeFlowValues,runtimePlcAllscalesFlow } = require('../repositories/postgress_repository');
 const { generateAndSaveLineChart } = require('../helpers/charts/chart_helper');
 
 module.exports.flowutility = async (startTime, endTime, startdate, enddate, scales, canvas) => {
@@ -57,6 +57,53 @@ module.exports.flowutility = async (startTime, endTime, startdate, enddate, scal
 }
 
 
+
+module.exports.flowObjectValues = async (startTime, endTime, startdate, enddate,runningtph, scales) => {
+
+
+
+    // // Use Promise.all for parallel processing
+    const reportPromises = scales.map(async (scale) => {
+        // Check if the required properties exist
+        if (!scale.scaleName || !scale.scaleName.S || !scale.iccid || !scale.iccid.S) {
+            console.error('Missing properties in scale for flow graph plot:', scale);
+            return { key: 'Unknown', error: 'Missing properties' };  // Return a default object to avoid breaking the map
+        }
+        const data = {
+            scaleName: scale.scaleName.S,
+            iccid: scale.iccid.S,
+
+        };
+        const key = data.scaleName;
+        const iccid = data.iccid;
+
+
+        try {
+
+
+
+        let myflowData = await runtimeFlowValues(startTime, endTime, startdate, enddate, runningtph, iccid);
+
+
+            return { key, flowData: myflowData[0]  };  // Use key instead of iccid
+        } catch (error) {
+            // Log or handle individual errors
+            console.error(`Error for ICCID ${iccid}:`, error);
+            return { key, error: error.message };  // Use key instead of iccid
+        }
+    });
+
+
+    // Wait for all promises to resolve
+    var flowDataArray = await Promise.all(reportPromises);
+
+
+
+ return flowDataArray;
+
+
+}
+
 module.exports.flowDataPLC = async(startTime, endTime,startdate,enddate, plcflowArray, canvas,plcIccid)=>{
 
     
@@ -93,6 +140,32 @@ module.exports.flowDataPLC = async(startTime, endTime,startdate,enddate, plcflow
     
 }
 
+module.exports.flowObjectDataPLC = async (startTime, endTime, startdate, enddate, plcflowArray, runningtph,plcIccid) => {
+
+
+    // Use Promise.all for parallel processing
+    const reportPromises = plcflowArray.map(async (scale) => {
+        const key = Object.keys(scale)[0];
+        const title = scale[key];
+
+    
+
+        try {
+            // Assuming runtimePlcFlow is a defined function that returns flow data
+            let myflowData = await runtimePlcAllscalesFlow(startTime, endTime, startdate, enddate,plcIccid, title, runningtph);
+            return { key, flowData: myflowData[0] };  // Use key instead of iccid
+        } catch (error) {
+            // Log or handle individual errors
+            console.error(`Error for ICCID ${title}:`, error);
+            return { key, error: error.message };  // Use key instead of iccid
+        }
+    });
+
+    // Wait for all promises to resolve
+    var flowDataArray = await Promise.all(reportPromises);
+
+    return flowDataArray;
+}
 
 
 module.exports.cycloneDataPLC = async(postgress_start, postgress_end, startdate, enddate, cyclonegraph, canvas,plcIccid)=>{

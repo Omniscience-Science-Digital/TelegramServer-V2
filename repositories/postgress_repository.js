@@ -4,7 +4,7 @@ const db = require('../configs/postgress_db');
 
 //shifttons 
 
-const shiftTons = async (startTime, endTime, startdate, enddate, iccid,modbus_key) => {
+const shiftTons = async (startTime, endTime, startdate, enddate, iccid, modbus_key) => {
   try {
 
     let query;
@@ -61,7 +61,7 @@ const shiftTons = async (startTime, endTime, startdate, enddate, iccid,modbus_ke
 
     }
 
-    
+
 
     const result = await db.query(query);
 
@@ -76,13 +76,13 @@ const shiftTons = async (startTime, endTime, startdate, enddate, iccid,modbus_ke
   }
 };
 
-const shiftTonsplc = async (startTime, endTime, startdate, enddate, title,plcIccid) => {
+const shiftTonsplc = async (startTime, endTime, startdate, enddate, title, plcIccid) => {
   try {
 
     let query;
 
 
-      query = `
+    query = `
           WITH filtered_data AS (
               SELECT
               iccid,
@@ -104,7 +104,7 @@ const shiftTonsplc = async (startTime, endTime, startdate, enddate, title,plcIcc
           
           `;
 
-    
+
 
 
 
@@ -122,12 +122,12 @@ const shiftTonsplc = async (startTime, endTime, startdate, enddate, title,plcIcc
 };
 
 
-const startingHourtons = async ( startTime, endTime, startdate, enddate, iccid,modbus_key) => {
+const startingHourtons = async (startTime, endTime, startdate, enddate, iccid, modbus_key) => {
 
   // Split the startTime string into hours and minutes
   const [startHour, startMinute] = endTime.split(':');
 
-  
+
 
   // Convert the hours and minutes to numbers
   const hour = parseInt(startHour, 10);
@@ -149,8 +149,8 @@ const startingHourtons = async ( startTime, endTime, startdate, enddate, iccid,m
   let query;
   try {
 
-   
-    query=`WITH ranked_data AS (
+
+    query = `WITH ranked_data AS (
       SELECT
           iccid,
           title,
@@ -210,7 +210,7 @@ const startingHourtons = async ( startTime, endTime, startdate, enddate, iccid,m
       date;`;
 
 
-     
+
 
     const result = await db.query(query);
 
@@ -226,7 +226,7 @@ const startingHourtons = async ( startTime, endTime, startdate, enddate, iccid,m
   }
 }
 
-const startingPlcHourtons = async(shift, startTime, endTime, startdate, enddate, title,plcIccid)=> {
+const startingPlcHourtons = async (shift, startTime, endTime, startdate, enddate, title, plcIccid) => {
 
   // Split the startTime string into hours and minutes
   const [startHour, startMinute] = endTime.split(':');
@@ -250,7 +250,7 @@ const startingPlcHourtons = async(shift, startTime, endTime, startdate, enddate,
   let query;
   try {
 
-  if (startTime === originalendTime) {
+    if (startTime === originalendTime) {
       query = `
       WITH ranked_data AS (
         (
@@ -356,25 +356,23 @@ exports.hourlyShifttons = async (shift, startTime, endTime, startdate, enddate, 
   try {
 
 
-    var modbus_key= `(datasourcekey = 'modbus-1-0' OR datasourcekey = 'modbus-17-0')`;
+    var modbus_key = `(datasourcekey = 'modbus-1-0' OR datasourcekey = 'modbus-17-0')`;
     //for period shift tons
-    let Shifttons = await shiftTons(startTime, endTime, startdate, enddate, iccid,modbus_key);
+    let Shifttons = await shiftTons(startTime, endTime, startdate, enddate, iccid, modbus_key);
 
-    let myData = await startingHourtons( startTime, endTime, startdate, enddate, iccid,modbus_key);
+    let myData = await startingHourtons(startTime, endTime, startdate, enddate, iccid, modbus_key);
 
-    if(Shifttons)
-      {
-        if(parseFloat(Shifttons[0])<0)
-          {
-            var modbus_key= `(datasourcekey = 'modbus-1-13')`;
-            Shifttons = await shiftTons(startTime, endTime, startdate, enddate, iccid,modbus_key);
-            myData = await startingHourtons( startTime, endTime, startdate, enddate, iccid,modbus_key);
-            
+    if (Shifttons) {
+      if (parseFloat(Shifttons[0]) < 0) {
+        var modbus_key = `(datasourcekey = 'modbus-1-13')`;
+        Shifttons = await shiftTons(startTime, endTime, startdate, enddate, iccid, modbus_key);
+        myData = await startingHourtons(startTime, endTime, startdate, enddate, iccid, modbus_key);
 
-          }
-          
 
       }
+
+
+    }
 
 
 
@@ -417,17 +415,17 @@ exports.hourlyShifttons = async (shift, startTime, endTime, startdate, enddate, 
 }
 
 
-exports.hourlyPlcShifttons = async (shift, startTime, endTime, startdate, enddate, title,plcIccid) => {
+exports.hourlyPlcShifttons = async (shift, startTime, endTime, startdate, enddate, title, plcIccid) => {
 
   try {
 
 
     //for period shift tons
-    const Shifttons = await shiftTonsplc(startTime, endTime, startdate, enddate, title,plcIccid);
+    const Shifttons = await shiftTonsplc(startTime, endTime, startdate, enddate, title, plcIccid);
 
 
     //hourly Shift tons
-    const myData = await startingPlcHourtons(shift, startTime, endTime, startdate, enddate, title,plcIccid);
+    const myData = await startingPlcHourtons(shift, startTime, endTime, startdate, enddate, title, plcIccid);
 
 
 
@@ -602,7 +600,7 @@ exports.graphQueryShiftons = async (startTime, endTime, startdate, enddate, icci
 };
 
 
-exports.graphQueryPlcShiftons = async (startTime, endTime, startdate, enddate,title,plcIccid) => {
+exports.graphQueryPlcShiftons = async (startTime, endTime, startdate, enddate, title, plcIccid) => {
   try {
     const query = `
       SELECT DISTINCT ON (date)
@@ -1034,7 +1032,7 @@ exports.plcScaleFlow = async (startTime, endTime, startdate, enddate, iccid, tit
         
         `;
 
- 
+
     const result = await db.query(query);
 
     // Extract the "shifttons" value from the rows
@@ -1051,6 +1049,58 @@ exports.plcScaleFlow = async (startTime, endTime, startdate, enddate, iccid, tit
 
 }
 
+//Independentflow
+
+
+exports.runtimeFlowValues = async (startTime, endTime, startdate, enddate, runningtph, iccid) => {
+  try {
+
+
+    const query = `WITH filtered_data AS (
+      SELECT
+          iccid,
+          title,
+          value::numeric AS numeric_value,
+          date,
+          LAG(date) OVER (PARTITION BY iccid ORDER BY date) AS previous_date,
+          ROW_NUMBER() OVER (PARTITION BY iccid ORDER BY date) AS row_number
+      FROM
+          public.devicelogs_production_${iccid}
+      WHERE
+          (datasourcekey = 'modbus-1-4' OR datasourcekey = 'modbus-17-4')
+            AND date BETWEEN '${startdate} ${startTime}' AND '${enddate} ${endTime}'
+  )
+  
+  SELECT
+      SUM(EXTRACT(EPOCH FROM (date - previous_date)))/3600 AS "Run Time (hrs)",
+      MAX(numeric_value) AS "Run Max (tph)",
+      AVG(numeric_value) AS "Run Avge (tph)"
+  FROM
+      filtered_data
+  WHERE
+      numeric_value > '${runningtph}'
+      AND previous_date IS NOT NULL
+  GROUP BY
+      iccid;
+  `;
+  
+
+
+    const result = await db.query(query);
+
+
+
+    const flowvalues = result.rows.map(row => row);
+
+
+    return flowvalues;
+
+  } catch (error) {
+    console.error('Error listing tables:', error);
+    throw error;
+  }
+
+}
 
 //runtime single scale
 
@@ -1134,6 +1184,7 @@ exports.runtimePlcFlow = async (startTime, endTime, startdate, enddate, plcIccid
         
       `;
 
+      
 
     const result = await db.query(query);
 
@@ -1153,6 +1204,56 @@ exports.runtimePlcFlow = async (startTime, endTime, startdate, enddate, plcIccid
 }
 
 
+exports.runtimePlcAllscalesFlow = async (startTime, endTime, startdate, enddate, plcIccid,title,  runningtph) => {
+  try {
+
+    const query = `
+          WITH filtered_data AS (
+            SELECT
+                iccid,
+                title,
+                value::numeric AS numeric_value,
+                date,
+                LAG(date) OVER (ORDER BY date) AS previous_date
+            FROM
+            public.devicelogs_production_${plcIccid}
+            WHERE
+            datasourcekey='${title}'
+            AND date BETWEEN '${startdate} ${startTime}' AND '${enddate} ${endTime}'
+        )
+        SELECT
+        
+            SUM(EXTRACT(EPOCH FROM (date - previous_date)))/3600 AS "Run Time (hrs)",
+               MAX(numeric_value) AS "Run Max (tph)",
+      AVG(numeric_value) AS "Run Avge (tph)"
+        FROM
+            filtered_data
+        WHERE
+            numeric_value > '${runningtph}'
+            AND previous_date IS NOT NULL
+        GROUP BY
+            iccid;
+        
+      `;
+
+      
+
+    const result = await db.query(query);
+
+
+
+    const downtons = result.rows.map(row => row);
+
+
+
+    return downtons;
+
+  } catch (error) {
+    console.error('Error listing tables:', error);
+    throw error;
+  }
+
+}
 
 exports.runtimeAccumulatingSingleFlow = async (startTime, endTime, startdate, enddate, runningtph, flowiccid) => {
   try {
@@ -1185,7 +1286,7 @@ exports.runtimeAccumulatingSingleFlow = async (startTime, endTime, startdate, en
         
       `;
 
-      
+
     const result = await db.query(query);
 
 
@@ -1204,8 +1305,7 @@ exports.runtimeAccumulatingSingleFlow = async (startTime, endTime, startdate, en
 }
 
 
-
-exports.runtimeAccumulatingFlow = async (startTime, endTime, startdate, enddate, runningtph,flowtitle, flowiccid) => {
+exports.runtimeAccumulatingFlow = async (startTime, endTime, startdate, enddate, runningtph, flowtitle, flowiccid) => {
   try {
 
     const query = `
@@ -1254,7 +1354,7 @@ exports.runtimeAccumulatingFlow = async (startTime, endTime, startdate, enddate,
 }
 
 
-exports.runtimeAccumulatingPlcFlow = async (startTime, endTime, startdate, enddate, runningtph, title,plcIccid) => {
+exports.runtimeAccumulatingPlcFlow = async (startTime, endTime, startdate, enddate, runningtph, title, plcIccid) => {
   try {
 
     const query = `
@@ -1302,8 +1402,6 @@ exports.runtimeAccumulatingPlcFlow = async (startTime, endTime, startdate, endda
 }
 
 //monthtodate
-
-
 
 exports.monthToDate = async (startTime, endTime, startdate, enddate, iccid) => {
   try {

@@ -22,11 +22,11 @@ const timeZone = 'Africa/Johannesburg';
     // await report_controller.reportdataeXtraShift(extrashiftitems,"day");
 
 
-    //   const items = await scanDynamoDBTableDay('22:00');
+    //   const items = await scanDynamoDBTableDay('19:00');
     //   await report_controller.reportdata(items,"day");
 
-    //  const items = await scanDynamoDBTableNight('02:00');
-    //  await report_controller.reportdata(items,"night");
+     const items = await scanDynamoDBTableNight('06:00');
+     await report_controller.reportdata(items,"night");
 
 //     } catch (error) {
 //         console.error('Error:', error);

@@ -1,5 +1,5 @@
 
-const { shiftData, monthData} = require('../../resources/static.headers.resource');
+const { shiftData, monthData } = require('../../resources/static.headers.resource');
 
 
 module.exports.drawRectangleWithText = (doc, text, posY) => {
@@ -77,18 +77,18 @@ module.exports.drawHeaderRectangles = (doc, reportHeaderRenames, reportDataArray
 
 
 
-  createTable(doc, shiftData, point-10, 20);
+  createTable(doc, shiftData, point - 10, 20);
   //right table
-  createTable(doc, monthData, point-10, (320));
+  createTable(doc, monthData, point - 10, (320));
 
   //bottom tables
 
-  
+
   let renameHeaders = reportHeaderRenames?.L;
 
   var monthkeylen = 0.54;
-  let letbottom=[];
-  let formulaData = [ ];
+  let letbottom = [];
+  let formulaData = [];
 
   var shiftstats = reportDataArray.shiftstats;
   var mtdstats = reportDataArray.mtdstat;
@@ -198,14 +198,14 @@ module.exports.drawHeaderRectangles = (doc, reportHeaderRenames, reportDataArray
       } else {
 
 
-  
+
         const existsShift = renameHeaders.some(header => {
           // Check if any value in the header object starts with "Shift "
           return Object.values(header).some(value => typeof value === 'string' && value.startsWith("Shift"));
         });
- 
-        
-        if ((!uniqueKeys.has(mykey))&& !existsShift) {
+
+
+        if ((!uniqueKeys.has(mykey)) && !existsShift) {
 
           uniqueKeys.add(mykey);
           letbottom.push([{ text: mykey, width: 0.46, }, { text: ' ' + reportDataArray.shifttons + '  tons', width: 0.6, }])
@@ -223,7 +223,7 @@ module.exports.drawHeaderRectangles = (doc, reportHeaderRenames, reportDataArray
           if (!uniqueKeys.has(startkey)) {
 
             uniqueKeys.add(startkey);
-            letbottom.push([{ text:'Plant '+ key + ' :', width: 0.46, }, { text: ' ' + value + '  %', width: 0.6, }])
+            letbottom.push([{ text: 'Plant ' + key + ' :', width: 0.46, }, { text: ' ' + value + '  %', width: 0.6, }])
           }
 
       }
@@ -244,14 +244,14 @@ module.exports.drawHeaderRectangles = (doc, reportHeaderRenames, reportDataArray
 
       startkey = key.toLowerCase();
 
-    
+
 
       if (!startkey.startsWith('shift') && !uniqueheaderKeys.has(startkey)) {
         const exists = renameHeaders.some(header => Object.values(header).includes(key));
 
-        
 
-        if (exists|| startkey==='yield') {
+
+        if (exists || startkey === 'yield') {
 
           uniqueheaderKeys.add(startkey);
           formulaData.push([{ text: `MTD  ${key}`, width: 0.54 }, { text: ' ' + value + ' %', width: 0.7 }])
@@ -266,14 +266,14 @@ module.exports.drawHeaderRectangles = (doc, reportHeaderRenames, reportDataArray
 
   formulaData.push([
     {
-        text: 'MTD Runtime (hrs):',
-        width: monthkeylen,
+      text: 'MTD Runtime (hrs):',
+      width: monthkeylen,
     },
     {
-        text: ' ' +reportDataArray.mtdruntime + ' hours',
-        width: 0.7,
+      text: ' ' + reportDataArray.mtdruntime + ' hours',
+      width: 0.7,
     },
-])
+  ])
 
   createTable(doc, letbottom, (point + 60), (20));
   //right table bottom
@@ -552,6 +552,124 @@ module.exports.table = async (doc, dataArray, posY, posX) => {
 
 }
 
+
+module.exports.flowtable = async (doc, dataArray, posY, posX) => {
+
+  doc.font("Times-Roman").fontSize(7);
+
+
+  const pageWidth = 555;
+  const textSpacer = 5;
+
+  let y = posY;
+  let x = posX;
+
+
+  const allKeys = dataArray.map(entry => entry.key);
+  var keyswidth = (allKeys.length < 9) ? 0.107 : 0.1;
+
+
+  // Extract all unique times from the Shifttons data objects
+  const allTimes = Array.from(
+    new Set(
+      dataArray
+        .flatMap(entry => entry.flowData ? Object.keys(entry.flowData) : [])
+    )
+  );
+
+
+
+  // Create headers
+  const headers = ['Flow Variables', ...allKeys];
+
+
+  // Draw headers
+  const headerArr = headers.map(header => ({
+    text: '  ' + header,
+    width: header === 'Flow Variables' ? 0.105 : keyswidth, // Adjust the width as needed
+  }));
+
+
+  const headerCellHeight = Math.max(...headerArr.map(column => doc.heightOfString(column.text, { width: column.width * pageWidth }))) + textSpacer * 2;
+
+
+  // Add background color to the header row
+  doc.lineWidth(0.3).strokeColor('lightgrey');
+  doc.fillColor('lightgrey').lineJoin('miter').rect(x, y, pageWidth, headerCellHeight).fillAndStroke();
+
+  let headerWriterPos = x;
+  for (let i = 0; i < headerArr.length - 1; i++) {
+    headerWriterPos += headerArr[i].width * pageWidth;
+    doc.lineCap('butt').moveTo(headerWriterPos + textSpacer, y).lineTo(headerWriterPos + textSpacer, y + headerCellHeight).stroke();
+  }
+
+  let headerTextWriterPos = x + textSpacer;
+  for (let i = 0; i < headerArr.length; i++) {
+    doc.fillColor('black').text(headerArr[i].text, headerTextWriterPos, y + textSpacer, {
+      continued: false,
+      width: headerArr[i].width * pageWidth - (textSpacer + 5),
+      backgroundColor: 'lightgrey', // Background color for header text
+    });
+    headerTextWriterPos += headerArr[i].width * pageWidth + (textSpacer - 5);
+  }
+
+  y += headerCellHeight;
+
+
+  // Draw data rows
+
+
+  
+  let rowsDrawn = 0; // Track the number of rows drawn
+
+
+  allTimes.forEach((time, rowIndex) => {
+    const rowData = [time, ...allKeys.map(key => (parseFloat(dataArray.find(entry => entry.key === key)?.flowData?.[time] || '0.00').toFixed(2)))];
+
+
+    const rowArr = rowData.map((data, colIndex) => ({
+      text: '  ' + data,
+      width: colIndex === 0 ? 0.115 : 0.1, // Adjust the width as needed
+    }));
+
+    const rowCellHeight = Math.max(...rowArr.map(column => doc.heightOfString(column.text, { width: column.width * pageWidth }))) + textSpacer * 2;
+
+
+    doc.lineWidth(0.3).strokeColor('lightgrey');
+    doc.lineJoin('miter').rect(x, y, pageWidth, rowCellHeight).stroke();
+
+    let rowWriterPos = x;
+    for (let i = 0; i < rowArr.length - 1; i++) {
+      rowWriterPos += rowArr[i].width * pageWidth;
+      doc.lineCap('butt').moveTo(rowWriterPos + textSpacer, y).lineTo(rowWriterPos + textSpacer, y + rowCellHeight).stroke();
+    }
+
+    let rowTextWriterPos = x + textSpacer;
+    for (let i = 0; i < rowArr.length; i++) {
+      if (i === 0) {
+        doc.fillColor('lightgrey').rect(x, y, rowArr[i].width * pageWidth + 8, rowCellHeight).fill();
+      }
+      doc.fillColor('black').text(rowArr[i].text, rowTextWriterPos, y + textSpacer, {
+        continued: false,
+        width: rowArr[i].width * pageWidth - (textSpacer + 5),
+      });
+      rowTextWriterPos += rowArr[i].width * pageWidth + (textSpacer - 5);
+    }
+
+    y += rowCellHeight;
+    rowsDrawn++;
+
+
+
+  });
+
+
+}
+
+
+
+
+
 function sortTableRows(rows, time) {
   let pieRows = [];
 
@@ -731,21 +849,21 @@ module.exports.createSTatisticsTable = async (doc, rows, time, posY, posX, pageW
 module.exports.noProduction = async (doc, pdfdata) => {
 
   var primaryScales = pdfdata.primaryScalesArray
-  var plural =(primaryScales.length===1) ? 'scale ' :'scales ';
+  var plural = (primaryScales.length === 1) ? 'scale ' : 'scales ';
 
 
   // Generate the message
   const message = `The following primary ${plural} ${primaryScales.join(', ')} had no production.`;
 
- //  Calculate the position dynamically
-const textWidth = doc.widthOfString(message);
-const padding = (doc.page.width - textWidth) / 2;
+  //  Calculate the position dynamically
+  const textWidth = doc.widthOfString(message);
+  const padding = (doc.page.width - textWidth) / 2;
 
-// Add the message to the PDF document
-doc.fillColor("#61677A")
-  .fontSize(9)
-  .text(message, padding, 300)
-  .moveDown();
+  // Add the message to the PDF document
+  doc.fillColor("#61677A")
+    .fontSize(9)
+    .text(message, padding, 300)
+    .moveDown();
 
 
 

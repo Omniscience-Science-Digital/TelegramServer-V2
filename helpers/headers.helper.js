@@ -57,6 +57,7 @@ module.exports.headers_helper = (shift, reportDataArray, monthStart, endTime, st
 
 
 
+            return    shiftData[0][1].text;
 
 
     } catch (error) {

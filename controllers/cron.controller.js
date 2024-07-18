@@ -9,7 +9,7 @@ exports.reportdata = async (sites, shift) => {
 
     let reportDataArray;
 
-    let item, startTime, runtime, sitestatus, dayStart, primaryScalesArray, endTime, sitename, runningtph, maxUtilization, chatId, totalMonthTarget, startDay, scaleType, flowtitle, flowiccid, plcIccid, scales;
+    let item, startTime, sitestatus, dayStart, primaryScalesArray, endTime, sitename, runningtph, maxUtilization, chatId, totalMonthTarget, startDay, scaleType, flowtitle, flowiccid, plcIccid, scales;
 
     let items = sites;
 
@@ -22,6 +22,10 @@ exports.reportdata = async (sites, shift) => {
 
         // Don't run if not allowed
         if (!sitestatus) continue;
+
+    
+
+      // if(sitename!=="Masama")continue;
 
         console.log(sitename + ' : ');
 
@@ -41,8 +45,6 @@ exports.reportdata = async (sites, shift) => {
         }
 
         //check if report runs 24 hours
-
-        var fullday =(startTime===endTime)?true:false;
 
 
         chatId = item.telegramid?.S || '';
@@ -76,6 +78,10 @@ exports.reportdata = async (sites, shift) => {
 
         startDay = formattedDate + ' ,' + dayStart;
 
+
+     
+
+  
         try {
             if (scaleType === 'single') {
                 console.log('Processing single scale type'); // Additional log for debugging
@@ -92,9 +98,10 @@ exports.reportdata = async (sites, shift) => {
             }
 
             // Handle headers objects
-            await headers_helper(shift, reportDataArray, monthstart, endTime, startTime);
+   
+            const reportDateTime= await headers_helper(shift, reportDataArray, monthstart, endTime, startTime);
 
-            await populateObjects(reportDataArray, chatId, sitename, reportHeaderRenames,fullday);
+            await populateObjects(reportDataArray, chatId, sitename, reportHeaderRenames,reportDateTime);
         } catch (error) {
             console.error(`Error processing ${sitename}:`, error); // Log the error for the current site
             // Optionally continue to the next iteration without stopping the loop
@@ -109,7 +116,7 @@ exports.reportdataeXtraShift = async (sites, shift) => {
 
     let reportDataArray;
 
-    let item, startTime, runtime, sitestatus, dayStart, primaryScalesArray, endTime, sitename, runningtph, maxUtilization, chatId, totalMonthTarget, startDay, scaleType, flowtitle, flowiccid, plcIccid, scales;
+    let item, startTime,  sitestatus, dayStart, primaryScalesArray, endTime, sitename, runningtph, maxUtilization, chatId, totalMonthTarget, startDay, scaleType, flowtitle, flowiccid, plcIccid, scales;
 
     let items = sites;
 
@@ -136,8 +143,6 @@ exports.reportdataeXtraShift = async (sites, shift) => {
 
         //check if report runs 24 hours
 
-        var fullday =(startTime===endTime)?true:false;
-
 
         chatId = item.telegramid?.S || '';
         runtime = item.runtime?.N;
@@ -186,9 +191,10 @@ exports.reportdataeXtraShift = async (sites, shift) => {
             }
 
             // Handle headers objects
-            await headers_helper(shift, reportDataArray, monthstart, endTime, startTime);
+           const reportDateTime= await headers_helper(shift, reportDataArray, monthstart, endTime, startTime);
 
-            await populateObjects(reportDataArray, chatId, sitename, reportHeaderRenames,fullday);
+        
+            await populateObjects(reportDataArray, chatId, sitename, reportHeaderRenames,reportDateTime);
         } catch (error) {
             console.error(`Error processing ${sitename}:`, error); // Log the error for the current site
             // Optionally continue to the next iteration without stopping the loop

@@ -11,7 +11,6 @@ const botToken = process.env.telegramBotToken;
 const bot = new TelegramBot(botToken, { polling: true });
 
 
-
 // Async function to send a PDF buffer to a specific chat ID with a caption and custom filename
 async function sendPdfBuffer(chatId, pdfBuffer, fileName, caption) {
   try {
@@ -39,7 +38,7 @@ async function sendPdfBuffer(chatId, pdfBuffer, fileName, caption) {
 async function handleTelegramNotification(chatId, pdfBuffer, fileName) {
   try {
     // Send the PDF buffer to Telegram
-    await sendPdfBuffer(chatId, pdfBuffer, fileName);
+   // await sendPdfBuffer(chatId, pdfBuffer, fileName);
   } catch (error) {
     console.error('Error handling Telegram notification:', error);
   }

@@ -4,7 +4,7 @@ const { singlecaleCalcsFunc } = require('./single.scale.utility');
 const { parallelcaleCalcsFunc } = require('./parallel.scale.utility')
 const { plcScaleCalcsFunc } = require('./plc.scale.utility.js')
 const { handleShiftons ,handlePlcShiftons} = require('./shiftons.utility');
-const { flowutility ,flowDataPLC,cycloneDataPLC} = require('./flow.utility');
+const { flowutility ,flowObjectValues,flowDataPLC,flowObjectDataPLC,cycloneDataPLC} = require('./flow.utility');
 const { calculatorCalculations } = require('./formulas.utility');
 const { createDonutChart } = require('../helpers/charts/chart_helper');
 
@@ -28,6 +28,9 @@ module.exports.singleScale = async (startTime, endTime, scales, monthstart, shif
 
         const myflowBuffer = await flowutility(postgress_start, postgress_end, startdate, enddate, scales, canvas);
 
+
+        const myflowObject = await flowObjectValues(postgress_start, postgress_end, startdate, enddate,runningtph, scales);
+    
 
 
         //check if site ran
@@ -53,7 +56,7 @@ module.exports.singleScale = async (startTime, endTime, scales, monthstart, shif
   
         shift_statisticsPie = { shift_statisticsPie }
 
-        const combinedObject = { ...flow_Values,...{cyclonegraphbuffer}, ...tonnage, ...shift_statisticsPie, ...{ primaryScalesArray },...shiftStats };
+        const combinedObject = { ...flow_Values,...{cyclonegraphbuffer}, ...tonnage, ...shift_statisticsPie, ...{ primaryScalesArray },...shiftStats,...{myflowObject} };
 
 
         return combinedObject;
@@ -82,12 +85,14 @@ module.exports.seriesScale = async (startTime, endTime, scales, monthstart, flow
         const myflowBuffer = await flowutility(postgress_start, postgress_end, startdate, enddate, scales, canvas);
 
 
-
-
-
         //check if site ran
         //check if site ran
         let flow_Values = await seriescaleCalcsFunc(shift,shifts_Ran,postgress_start, postgress_end, flowtitle, flowiccid, startdate, enddate, runningtph, maxUtilization, scales, primaryScalesArray)
+
+        //perscale flow average , run time and max
+
+        const myflowObject = await flowObjectValues(postgress_start, postgress_end, startdate, enddate,runningtph, scales);
+
 
         //handle shift tons 
         let tonnage = await handleShiftons(myflowBuffer, shift, postgress_start, postgress_end, startdate, enddate, scales, monthstart, primaryScalesArray, mtd_target, scaleType, canvas, virtualDatapoints,maxUtilization)
@@ -109,7 +114,7 @@ module.exports.seriesScale = async (startTime, endTime, scales, monthstart, flow
 
         shift_statisticsPie = { shift_statisticsPie }
 
-        const combinedObject = { ...flow_Values,...{cyclonegraphbuffer}, ...tonnage, ...shift_statisticsPie, ...{ primaryScalesArray },...shiftStats };
+        const combinedObject = { ...flow_Values,...{cyclonegraphbuffer}, ...tonnage, ...shift_statisticsPie, ...{ primaryScalesArray },...shiftStats ,...{myflowObject}};
 
         return combinedObject;
 
@@ -137,6 +142,7 @@ module.exports.parallelScale = async (startTime, endTime, scales, monthstart, fl
         const myflowBuffer = await flowutility(postgress_start, postgress_end, startdate, enddate, scales, canvas);
 
 
+        const myflowObject = await flowObjectValues(postgress_start, postgress_end, startdate, enddate,runningtph, scales);
 
         //check if site ran
         let flow_Values = await parallelcaleCalcsFunc(shift,shifts_Ran,postgress_start, postgress_end, flowtitle, flowiccid, startdate, enddate, runningtph, maxUtilization, scales, primaryScalesArray)
@@ -160,7 +166,7 @@ module.exports.parallelScale = async (startTime, endTime, scales, monthstart, fl
 
         shift_statisticsPie = { shift_statisticsPie }
 
-        const combinedObject = { ...flow_Values,...{cyclonegraphbuffer}, ...tonnage, ...shift_statisticsPie, ...{ primaryScalesArray },...shiftStats };
+        const combinedObject = { ...flow_Values,...{cyclonegraphbuffer}, ...tonnage, ...shift_statisticsPie, ...{ primaryScalesArray },...shiftStats ,...{myflowObject}};
 
 
 
@@ -201,6 +207,8 @@ module.exports.plcScale = async (startTime, endTime, scales,plcIccid,plcFlow,cyc
         let flow_Values = await plcScaleCalcsFunc(shifts_Ran,monthstart,shift,postgress_start, postgress_end, startdate, enddate,plcFlow, runningtph, maxUtilization, scales, primaryScalesArray,plcIccid)
         
         
+    
+        const myflowObject = await flowObjectDataPLC(postgress_start, postgress_end, startdate, enddate, plcFlow,runningtph,plcIccid);
       
         //handle shift tons 
         let tonnage = await handlePlcShiftons(myflowBuffer,plcIccid, shift, postgress_start, postgress_end, startdate, enddate, scales, monthstart, primaryScalesArray, mtd_target, scaleType, canvas, virtualDatapoints,maxUtilization)
@@ -222,7 +230,7 @@ module.exports.plcScale = async (startTime, endTime, scales,plcIccid,plcFlow,cyc
 
         shift_statisticsPie = { shift_statisticsPie }
 
-        const combinedObject = { ...flow_Values,...{cyclonegraphbuffer}, ...tonnage, ...shift_statisticsPie, ...{ primaryScalesArray },...shiftStats };
+        const combinedObject = { ...flow_Values,...{cyclonegraphbuffer}, ...tonnage, ...shift_statisticsPie, ...{ primaryScalesArray },...shiftStats,...{myflowObject} };
 
 
         

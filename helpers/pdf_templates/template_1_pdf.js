@@ -3,7 +3,7 @@ const fs = require("fs");
 const blobStream = require('blob-stream');
 const {generateHeader,drawRectangleWithNoText} = require('../pdf_Components/pdf_header');
 const {generateFooter} = require('../pdf_Components/pdf_footer');
-const {drawRectangleWithText,createDefinitionsTable,drawHeaderRectangles,table,createSTatisticsTable,noProduction}=require('../pdf_Components/pdf_tables')
+const {drawRectangleWithText,createDefinitionsTable,drawHeaderRectangles,table,flowtable,createSTatisticsTable,noProduction}=require('../pdf_Components/pdf_tables')
 const {dataDefinitions} = require('../../resources/data.resource');
 
 const {generateflowShifttonsGraph,drawPieCharts} = require('../pdf_Components/plot_graphs')
@@ -93,18 +93,22 @@ async function PDFTableGenerator(pdfdata,sitename,filePath,reportHeaderRenames,f
     // Generate the PDF content
 
      //flow graph
-     drawRectangleWithText(doc, 'SHIFT MASS FLOW TREND', customerInformationTop = 70);
-     generateflowShifttonsGraph(doc,pdfdata.flowGraphBuffer,pdfdata.cyclonegraphbuffer, 95, 322)
+     drawRectangleWithText(doc, 'SHIFT MASS FLOW TREND', customerInformationTop = 60);
+     generateflowShifttonsGraph(doc,pdfdata.flowGraphBuffer,pdfdata.cyclonegraphbuffer, 80, 365)
+
+     drawRectangleWithText(doc, 'SHIFT FLOW STATISTICS', customerInformationTop = 235);
+   
+      await flowtable(doc, pdfdata.myflowObject, 258, 20);
 
        //shift tons graph
 
-    drawRectangleWithText(doc, 'SHIFT PROCESS VARIABLE TREND', customerInformationTop = 295);
+     drawRectangleWithText(doc, 'SHIFT PROCESS VARIABLE TREND', customerInformationTop = 340);
 
  
 
-        drawRectangleWithText(doc, 'PROGRESSIVE SHIFT  TONS', customerInformationTop = 520);
-       // Draw  Shiftons table
-       await table(doc, pdfdata.total_shifttons, 545, 20);
+    drawRectangleWithText(doc, 'PROGRESSIVE SHIFT  TONS', customerInformationTop = 520);
+    //    // Draw  Shiftons table
+     await table(doc, pdfdata.total_shifttons, 545, 20);
 
 
       
@@ -116,7 +120,7 @@ async function PDFTableGenerator(pdfdata,sitename,filePath,reportHeaderRenames,f
     const range = doc.bufferedPageRange(); // => { start: 0, count: 2 }
 
     
-   //  doc.pipe(fs.createWriteStream('./z/'+filePath));
+    //doc.pipe(fs.createWriteStream('./z/'+filePath));
 
     // Manually flush pages that have been buffered
     doc.flushPages();
@@ -125,7 +129,6 @@ async function PDFTableGenerator(pdfdata,sitename,filePath,reportHeaderRenames,f
     doc.end();
 
     
-
 
     // Resolve the PDF buffer when the document ends
     doc.on("end", async () => {
