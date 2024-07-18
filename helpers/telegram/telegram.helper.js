@@ -38,7 +38,7 @@ async function sendPdfBuffer(chatId, pdfBuffer, fileName, caption) {
 async function handleTelegramNotification(chatId, pdfBuffer, fileName) {
   try {
     // Send the PDF buffer to Telegram
-   // await sendPdfBuffer(chatId, pdfBuffer, fileName);
+   await sendPdfBuffer(chatId, pdfBuffer, fileName);
   } catch (error) {
     console.error('Error handling Telegram notification:', error);
   }
