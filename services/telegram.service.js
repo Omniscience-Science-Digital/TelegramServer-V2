@@ -18,8 +18,8 @@ async function populateObjects(reportdata,chatId,sitename,reportHeaderRenames,re
             const caption = `${sitename}_report`;
 
                 // Send the PDF buffer to Telegram with the specified caption
-            handleTelegramNotification('-4019893816', pdfBuffer, `${sitename}_report.pdf`, caption);
-          // await handleTelegramNotification(chatId, pdfBuffer, `${sitename}_report.pdf`, caption);
+           // handleTelegramNotification('-4019893816', pdfBuffer, `${sitename}_report.pdf`, caption);
+            await handleTelegramNotification(chatId, pdfBuffer, `${sitename}_report.pdf`, caption);
 
           //email helper
           
