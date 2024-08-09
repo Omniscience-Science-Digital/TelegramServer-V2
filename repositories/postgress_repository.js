@@ -225,7 +225,6 @@ const startingHourtons = async (startTime, endTime, startdate, enddate, iccid, m
     throw error;
   }
 }
-
 const startingPlcHourtons = async (shift, startTime, endTime, startdate, enddate, title, plcIccid) => {
 
   // Split the startTime string into hours and minutes
@@ -279,7 +278,7 @@ const startingPlcHourtons = async (shift, startTime, endTime, startdate, enddate
                
            public.devicelogs_production_${plcIccid}
             WHERE
-                (datasourcekey = 'modbus-1-0' OR datasourcekey = 'modbus-17-0')
+                (datasourcekey = '${title}' OR datasourcekey = 'modbus-17-0')
                 AND date BETWEEN  timestamp  '${enddate} ${startTime}' AND  timestamp  '${enddate} ${endTime}' + interval '5 minutes'
         
         
