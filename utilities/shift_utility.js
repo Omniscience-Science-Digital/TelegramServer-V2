@@ -127,6 +127,7 @@ module.exports.seriesScale = async (startTime, endTime, scales, monthstart, flow
 module.exports.parallelScale = async (startTime, endTime, scales, monthstart, flowtitle, flowiccid, shift, primaryScalesArray, runningtph, maxUtilization, mtd_target, scaleType, canvas, formulas, virtualDatapoints,shifts_Ran) => {
     try {
 
+
         //pass correct dt  time
         var postgress_start = subtractTwoHours(startTime);
         var postgress_end = subtractTwoHours(endTime);
@@ -138,9 +139,7 @@ module.exports.parallelScale = async (startTime, endTime, scales, monthstart, fl
 
 
         //get   flow graphs
-
         const myflowBuffer = await flowutility(postgress_start, postgress_end, startdate, enddate, scales, canvas);
-
 
         const myflowObject = await flowObjectValues(postgress_start, postgress_end, startdate, enddate,runningtph, scales);
 

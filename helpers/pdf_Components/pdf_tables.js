@@ -328,6 +328,7 @@ function createTable(doc, rows, posY, posX) {
 
 
 
+
 module.exports.table = async (doc, dataArray, posY, posX) => {
   doc.font("Times-Roman").fontSize(7);
 
@@ -509,7 +510,7 @@ module.exports.table = async (doc, dataArray, posY, posX) => {
   } else {
 
 
-    // Draw data row for Daytons
+    //Draw data row for Daytons
     const daytonRowData = ['Shift Total', ...allKeys.map(key => (dataArray.find(entry => entry.key === key)?.Daytons || 0).toString())];
 
     const daytonRowArr = daytonRowData.map((data, colIndex) => ({
@@ -541,6 +542,51 @@ module.exports.table = async (doc, dataArray, posY, posX) => {
     }
 
     y += daytonRowCellHeight;
+
+
+
+    // Draw data row for mtds
+    const mtdRowData = ['Mtd Achieved', ...allKeys.map(key => (dataArray.find(entry => entry.key === key)?.month_to_date || 0).toString())];
+
+    const mtdRowArr = mtdRowData.map((data, colIndex) => ({
+      text: '   ' + data,
+      width: colIndex === 0 ? 0.1 : 0.1, // Adjust the width as needed
+    }));
+
+    const mtdCellHeight = Math.max(...mtdRowArr.map(column => doc.heightOfString(column.text, { width: column.width * pageWidth }))) + textSpacer * 2;
+
+    doc.lineWidth(0.3).strokeColor('lightgrey');
+    doc.lineJoin('miter').rect(x, y, pageWidth, mtdCellHeight).stroke();
+
+
+    let mtdRowWriterPos = x;
+    for (let i = 0; i < mtdRowArr.length - 1; i++) {
+      mtdRowWriterPos += mtdRowArr[i].width * pageWidth;
+      doc.lineCap('butt').moveTo(mtdRowWriterPos + textSpacer, y).lineTo(mtdRowWriterPos + textSpacer, y + mtdCellHeight).stroke();
+    }
+
+    let mtdRowTextWriterPos = x + textSpacer;
+    for (let i = 0; i < mtdRowArr.length; i++) {
+      if (i === 0) {
+        doc.fillColor('#686D76').rect(x, y, mtdRowArr[i].width * pageWidth + 8, mtdCellHeight).fill();
+        doc.fillColor('white').text(mtdRowArr[i].text, mtdRowTextWriterPos, y + textSpacer, {
+          continued: false,
+          width: mtdRowArr[i].width * pageWidth - (textSpacer + 5),
+        });
+      }
+      else {
+
+
+        doc.fillColor('black').text(mtdRowArr[i].text, mtdRowTextWriterPos, y + textSpacer, {
+          continued: false,
+          width: mtdRowArr[i].width * pageWidth - (textSpacer + 5),
+        });
+
+      }
+      mtdRowTextWriterPos += mtdRowArr[i].width * pageWidth + (textSpacer - 5);
+    }
+
+    y += mtdCellHeight;
 
 
     doc.moveDown(2);
@@ -619,7 +665,7 @@ module.exports.flowtable = async (doc, dataArray, posY, posX) => {
   // Draw data rows
 
 
-  
+
   let rowsDrawn = 0; // Track the number of rows drawn
 
 
@@ -665,7 +711,6 @@ module.exports.flowtable = async (doc, dataArray, posY, posX) => {
 
 
 }
-
 
 
 
@@ -885,5 +930,102 @@ module.exports.drawRectangleWithNoText = (doc, posY) => {
   doc.fillColor(darkGrayShade).rect(20, posY, pageWidth - 40, darkGrayHeight).fill();
 
 }
+
+
+/** Mtd Table **/
+
+
+module.exports.mtdtable = async (doc, dataArray, posY, posX) => {
+  doc.font("Times-Roman").fontSize(7);
+
+
+
+  const pageWidth = 555;
+  const textSpacer = 5;
+
+  let y = posY;
+  let x = posX;
+
+  const allKeys = dataArray.map(entry => entry.key);
+  var keyswidth = (allKeys.length < 9) ? 0.107 : 0.1;
+
+
+  // Create headers
+  const headers = [' ', ...allKeys];
+
+  // Draw headers
+  const headerArr = headers.map(header => ({
+    text: '  ' + header,
+    width: header === ' ' ? 0.065 : keyswidth, // Adjust the width as needed
+  }));
+  const headerCellHeight = Math.max(...headerArr.map(column => doc.heightOfString(column.text, { width: column.width * pageWidth }))) + textSpacer * 2;
+
+  // Add background color to the header row
+  doc.lineWidth(0.3).strokeColor('lightgrey');
+  doc.fillColor('lightgrey').lineJoin('miter').rect(x, y, pageWidth, headerCellHeight).fillAndStroke();
+
+  let headerWriterPos = x;
+  for (let i = 0; i < headerArr.length - 1; i++) {
+    headerWriterPos += headerArr[i].width * pageWidth;
+    doc.lineCap('butt').moveTo(headerWriterPos + textSpacer, y).lineTo(headerWriterPos + textSpacer, y + headerCellHeight).stroke();
+  }
+
+  let headerTextWriterPos = x + textSpacer;
+  for (let i = 0; i < headerArr.length; i++) {
+    doc.fillColor('black').text(headerArr[i].text, headerTextWriterPos, y + textSpacer, {
+      continued: false,
+      width: headerArr[i].width * pageWidth - (textSpacer + 5),
+      backgroundColor: 'lightgrey', // Background color for header text
+    });
+    headerTextWriterPos += headerArr[i].width * pageWidth + (textSpacer - 5);
+  }
+
+  y += headerCellHeight;
+
+
+
+
+  // Draw data row for Daytons
+  const daytonRowData = ['MTD (t)', ...allKeys.map(key => (dataArray.find(entry => entry.key === key)?.month_to_date || 0).toString())];
+
+  const daytonRowArr = daytonRowData.map((data, colIndex) => ({
+    text: colIndex === 0 ? (' ' + data) : ('  ' + data),
+    width: colIndex === 0 ? 0.065 : 0.1, // Adjust the width as needed
+  }));
+
+  const daytonRowCellHeight = Math.max(...daytonRowArr.map(column => doc.heightOfString(column.text, { width: column.width * pageWidth }))) + textSpacer * 2;
+
+  doc.lineWidth(0.3).strokeColor('lightgrey');
+  doc.lineJoin('miter').rect(x, y, pageWidth, daytonRowCellHeight).stroke();
+
+  let daytonRowWriterPos = x;
+  for (let i = 0; i < daytonRowArr.length - 1; i++) {
+    daytonRowWriterPos += daytonRowArr[i].width * pageWidth;
+    doc.lineCap('butt').moveTo(daytonRowWriterPos + textSpacer, y).lineTo(daytonRowWriterPos + textSpacer, y + daytonRowCellHeight).stroke();
+  }
+
+  let daytonRowTextWriterPos = x + textSpacer;
+  for (let i = 0; i < daytonRowArr.length; i++) {
+    if (i === 0) {
+      doc.fillColor('lightgrey').rect(x, y, daytonRowArr[i].width * pageWidth + 8, daytonRowCellHeight).fill();
+    }
+    doc.fillColor('black').text(daytonRowArr[i].text, daytonRowTextWriterPos, y + textSpacer, {
+      continued: false,
+      width: daytonRowArr[i].width * pageWidth - (textSpacer + 5),
+    });
+    daytonRowTextWriterPos += daytonRowArr[i].width * pageWidth + (textSpacer - 5);
+  }
+
+  y += daytonRowCellHeight;
+
+
+  doc.moveDown(2);
+  doc.text('', doc.page.margins.left);
+
+
+}
+
+
+
 
 

@@ -179,7 +179,15 @@ async function handleShiftons(myflowBuffer, shift, startTime, endTime, startdate
 
 
 
-
+         total_shifttons = total_shifttons.map(shiftton => {
+            const correspondingMtds = mtdsObject.find(mtd => mtd.key === shiftton.key);
+            if (correspondingMtds) {
+              shiftton.month_to_date = parseFloat(correspondingMtds.month_to_date);
+            }
+            return shiftton;
+          });
+          
+  
         let shifttonsObject = {
             'montTodate_Target': parseFloat(mtd_target).toFixed(2),
             'mtd_achieved': parseFloat(mtd_achieved).toFixed(2),
@@ -380,6 +388,14 @@ async function handlePlcShiftons(myflowBuffer,plcIccid, shift, startTime, endTim
         total_shifttons =virtualformulas.length > 0? calculateDataPoints(virtualformulas,total_shifttons):total_shifttons;
 
         var site_had_production =(parseFloat(dailytons) >parseFloat(maxUtilization))?true:false;
+
+        total_shifttons = total_shifttons.map(shiftton => {
+            const correspondingMtds = mtdsObject.find(mtd => mtd.key === shiftton.key);
+            if (correspondingMtds) {
+              shiftton.month_to_date = parseFloat(correspondingMtds.month_to_date);
+            }
+            return shiftton;
+          });
 
 
         let shifttonsObject = {

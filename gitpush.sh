@@ -7,7 +7,7 @@ echo "Add"
 git add .
 
 echo "Commit"
-git commit -m "Caddy server setting"
+git commit -m "Mail Update and flow"
 
 
 echo "Push"

@@ -1,3 +1,4 @@
+const { performance } = require('perf_hooks');
 const { singleScale, seriesScale, parallelScale, plcScale } = require("../utilities/shift_utility");
 const { dertemine_numberofShifts, getCurrentDateFormatted } = require('../utilities/time.utility');
 const { populateObjects } = require('../services/telegram.service');
@@ -6,11 +7,12 @@ const { canvas } = require('../resources/static.headers.resource');
 
 exports.reportdata = async (sites, shift) => {
     console.log('Route : Shift controller -: ', shift);
+    const start = performance.now();
 
     let reportDataArray;
 
-    let item, startTime, sitestatus, dayStart, primaryScalesArray, endTime, sitename, runningtph, maxUtilization, chatId, totalMonthTarget, startDay, scaleType, flowtitle, flowiccid, plcIccid, scales;
-
+    let item, startTime, sitestatus, dayStart, primaryScalesArray, endTime, sitename, runningtph, maxUtilization, chatId, totalMonthTarget, allmtds, scaleType, flowtitle, flowiccid, plcIccid, scales,reportTo,email;
+    
     let items = sites;
 
     // Destructure sites
@@ -23,10 +25,10 @@ exports.reportdata = async (sites, shift) => {
         // Don't run if not allowed
         if (!sitestatus) continue;
 
-    
 
-      // if(sitename!=="Masama")continue;
+        //   if(sitename!=="Gaudini")continue;
 
+      
         console.log(sitename + ' : ');
 
         // Get current running date
@@ -48,6 +50,7 @@ exports.reportdata = async (sites, shift) => {
 
 
         chatId = item.telegramid?.S || '';
+        allmtds= item.allmtds?.S ||'' ,
         runtime = item.runtime?.N;
         totalMonthTarget = item.TotalmonthTarget?.S || '';
         scaleType = item.scale_type?.S || '';
@@ -58,6 +61,9 @@ exports.reportdata = async (sites, shift) => {
         runningtph = item.runningtph?.N || '';
         maxUtilization = item.maxUtilization?.N || '';
         plcIccid = item.plcIccid?.S || '';
+        reportTo=item.reportTo?.S || '';
+        email = item.email?.S || '';
+
 
         const { mtd_target, shifts_Ran } = dertemine_numberofShifts(item.dayStart?.S, item.nightStart?.S, item.extraShiftStart?.S, totalMonthTarget, monthstart, shift, enddate);
 
@@ -79,9 +85,7 @@ exports.reportdata = async (sites, shift) => {
         startDay = formattedDate + ' ,' + dayStart;
 
 
-     
-
-  
+        
         try {
             if (scaleType === 'single') {
                 console.log('Processing single scale type'); // Additional log for debugging
@@ -101,14 +105,42 @@ exports.reportdata = async (sites, shift) => {
    
             const reportDateTime= await headers_helper(shift, reportDataArray, monthstart, endTime, startTime);
 
-            await populateObjects(reportDataArray, chatId, sitename, reportHeaderRenames,reportDateTime);
+            
+            await populateObjects(reportDataArray, chatId, sitename, reportHeaderRenames,reportDateTime,reportTo,email);
         } catch (error) {
             console.error(`Error processing ${sitename}:`, error); // Log the error for the current site
             // Optionally continue to the next iteration without stopping the loop
             continue;
         }
     }
+
+    const end = performance.now();
+    console.log(`Execution time: ${end - start} milliseconds`);
 };
+
+
+
+const parseScales = (scales) => {
+    // Access the L array inside the first element of scales
+    const sortedscales = scales?.L[0]?.L || [];
+
+    // Check if sortedscales is an array and map over it
+    return Array.isArray(sortedscales) ? sortedscales.map((scale) => {
+        // Get the key of the object inside scale.M
+        const scaleKey = Object.keys(scale.M)[0];
+
+        // Get the value of the key, assuming it has a nested structure with S property
+        const scaleValue = scale.M[scaleKey]?.S || '';
+
+        // Create the scale object
+        const scaleObject = {};
+        scaleObject[scaleKey] = scaleValue;
+
+        return scaleObject;
+    }) : [];
+};
+
+
 
 
 exports.reportdataeXtraShift = async (sites, shift) => {
@@ -201,24 +233,4 @@ exports.reportdataeXtraShift = async (sites, shift) => {
             continue;
         }
     }
-};
-
-const parseScales = (scales) => {
-    // Access the L array inside the first element of scales
-    const sortedscales = scales?.L[0]?.L || [];
-
-    // Check if sortedscales is an array and map over it
-    return Array.isArray(sortedscales) ? sortedscales.map((scale) => {
-        // Get the key of the object inside scale.M
-        const scaleKey = Object.keys(scale.M)[0];
-
-        // Get the value of the key, assuming it has a nested structure with S property
-        const scaleValue = scale.M[scaleKey]?.S || '';
-
-        // Create the scale object
-        const scaleObject = {};
-        scaleObject[scaleKey] = scaleValue;
-
-        return scaleObject;
-    }) : [];
 };

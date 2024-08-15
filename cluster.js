@@ -1,46 +1,43 @@
-const { scanDynamoDBTableDay, scanDynamoDBTableNight ,scanDynamoDBTableExtraShift} = require('./repositories/dynamodb_repository');
-const report_controller = require('./controllers/cron.controller');
- const reportdata = require('./controllers/cluster.controller');
-
-
-
-
 const cron = require('node-cron');
+const reportdata = require('./controllers/cluster.controller');
+
+const { scanDynamoDBTableDay, scanDynamoDBTableNight, scanDynamoDBTableExtraShift } = require('./repositories/dynamodb_repository');
+
 
 // Set the time zone to Johannesburg, South Africa (SAST)
 const timeZone = 'Africa/Johannesburg';
 
 
+
+
 //testing script
 
 (async () => {
-//     try {
+    //     try {
 
 
-    // const items = await scanDynamoDBTableDay('22:00');
-    // //extrashift items
+    const items = await scanDynamoDBTableDay('18:00');
+    await  reportdata.reportdata(items,'day')
+
+    //extrashift items
     // const extrashiftitems =await scanDynamoDBTableExtraShift('22:00') 
 
 
+    // await reportdata.reportdata(extrashiftitems,"day2");
+       
 
-    // await report_controller.reportdata(items,"day");
-    // await report_controller.reportdataeXtraShift(extrashiftitems,"day");
+    //    const items = await scanDynamoDBTableNight('07:00');
+
+    //    await  reportdata.reportdata(items,'night')
 
 
-     // const items = await scanDynamoDBTableDay('19:00');
-      
-      //await  reportdata();
-
-   //  require('./controllers/cluster.controller');
-
-    
 
     //  const items = await scanDynamoDBTableNight('06:00');
-    //  await report_controller.reportdata(items,"night");
+    //  await reportdata.reportdata(items,"night");
 
-//     } catch (error) {
-//         console.error('Error:', error);
-//     }
+    //     } catch (error) {
+    //         console.error('Error:', error);
+    //     }
 })();
 
 
@@ -89,20 +86,20 @@ cron.schedule('5 19 * * *', async () => {
 }, { timezone: timeZone });
 
 
-
 cron.schedule('5 22 * * *', async () => {
     // This cron job triggers every day at 22 PM SAST
 
     const items = await scanDynamoDBTableDay('22:00');
     //extrashift items
-    const extrashiftitems =await scanDynamoDBTableExtraShift('22:00') 
+    const extrashiftitems = await scanDynamoDBTableExtraShift('22:00')
 
-    await report_controller.reportdata(items,"day");
-    await report_controller.reportdataeXtraShift(extrashiftitems,"day");
+    await report_controller.reportdata(items, "day");
+    
+    await reportdata.reportdata(extrashiftitems,"day2");
+
 
 
 }, { timezone: timeZone });
-
 
 
 

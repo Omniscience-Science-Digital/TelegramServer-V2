@@ -1,58 +1,65 @@
-const { SESClient, SendRawEmailCommand } = require("@aws-sdk/client-ses");
 require('dotenv').config();
 const nodemailer = require('nodemailer');
 const fs = require('fs');
+const path = require('path'); // To handle file paths
 
-const SES_CONFIG = {
-    region: process.env.AWS_REGION,
-    credentials: {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-    }
-}
+const Email_CONFIG = {
+    GMAIL_PASSWORD: process.env.GMAIL_PASSWORD,
+    GMAIL_USER: process.env.GMAIL_USER,
+};
 
-const AWS_SES = new SESClient(SES_CONFIG);
-
-async function handleEmailNotification(recipientEmail, header, pdfBuffer,sitename, name) {
-    const senderEmail = process.env.AWS_Sender_Email;
-
-    // Create a nodemailer transport
-    const transporter = nodemailer.createTransport({
-        SES: { ses: AWS_SES, aws: require('@aws-sdk/client-ses') }
+async function handleEmailNotification(recipientEmail, header, pdfBuffer, sitename, name) {
+    // Create a transporter
+    let transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+            user: Email_CONFIG.GMAIL_USER,
+            pass: Email_CONFIG.GMAIL_PASSWORD,
+        },
     });
 
-    // Read the image file into a buffer
-    const imageBuffer = fs.readFileSync('/Users/Thabiso/Downloads/massivePostgressServer/assets/omniscience.png');
+    // Define the path to the header image
+    const headerImagePath = path.join(__dirname, '../../assets/grok.png'); // Adjust this path based on your assets location
 
-    // Create the email options
-    const mailOptions = {
-        from: senderEmail,
+    // Set up email data
+    let mailOptions = {
+        from: Email_CONFIG.GMAIL_USER,
         to: recipientEmail,
-        subject: `Production report for  ,${sitename} ${header}`,
-        text: "Please find Below attached pdf report",
-        html: `<img src="cid:unique@nodemailer.com" style="width:15%;"/>`,
+        subject: `${sitename}  ${header},`,
+        html: `
+          <div style="font-family: Arial, sans-serif; line-height: 1.4; color: #333;">
+            <div style="padding: 17px;">
+              <p>Good ${new Date().getHours() < 12 ? 'Morning' : new Date().getHours() < 18 ? 'Afternoon' : 'Evening'}!</p>
+              <p>Please find the attached report for your reference.</p>
+              <p>Best regards,</p>
+            </div>
+            <div >
+              <img src="cid:header-image" alt="Massive Pty Ltd" style="width:40%; height: 60%">
+            </div>
+          </div>
+        `, // HTML body
         attachments: [
-            {
-                filename: name,
-                content: pdfBuffer,
-                contentType: 'application/pdf'
-            },
-            {
-                filename: 'image.png', // or the appropriate image file name
-                content: imageBuffer,
-                cid: 'unique@nodemailer.com' // same cid as in the html img src
-            }
-        ]
-    };
-
-    try {
-        // Send the email
-        const info = await transporter.sendMail(mailOptions);
-        console.log('Email has been sent');
-    } catch (error) {
-        console.error('Error sending email', error);
-        throw error;
-    }
+          {
+            filename: `${sitename}.pdf`,
+            content: pdfBuffer,
+          },
+          {
+            filename: 'header-image.jpg',
+            path: headerImagePath, // Path to the header image
+            cid: 'header-image', // Same CID value as in the html img src
+          }
+        ],
+      };
+      
+    // Send email
+    transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+            return console.log(error);
+        }
+        console.log('Message sent: %s', info.messageId);
+    });
 }
 
 module.exports = handleEmailNotification;
+
+

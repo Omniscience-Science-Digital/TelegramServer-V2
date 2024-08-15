@@ -12,15 +12,13 @@ const bot = new TelegramBot(botToken, { polling: true });
 
 
 // Async function to send a PDF buffer to a specific chat ID with a caption and custom filename
-async function sendPdfBuffer(chatId, pdfBuffer, fileName, caption) {
+async function sendPdfBuffer(chatId, pdfBuffer, fileName) {
   try {
     const fileOptions = {
       // Explicitly specify the file name.
       filename: fileName,
       // Explicitly specify the MIME type (optional).
       contentType: 'application/pdf',
-      // Add the caption property here.
-      caption: caption,
     };
 
     // Send the document to Telegram with the specified filename, caption, and content type

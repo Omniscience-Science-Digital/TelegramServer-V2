@@ -1,6 +1,6 @@
 module.exports.generateFooter=(doc) =>{
-    const footerHeight = 40; // Adjust this value based on your layout needs
-    const rectangleHeight = 30; // Adjust the height of the rectangle
+    const footerHeight = 28; // Adjust this value based on your layout needs
+    const rectangleHeight = 25; // Adjust the height of the rectangle
     const fontSize = 7; // Adjust the font size for the text
     const textColor = '#000'; // Adjust the color of the text
     const rectangleColor = '#f0f0f0'; // Adjust the color of the rectangle
