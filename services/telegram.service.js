@@ -3,11 +3,12 @@ const handleTelegramNotification = require('../helpers/telegram/telegram.helper'
 const handleEmailNotification = require('../helpers/email/email_helper')
 
 
-async function populateObjects(reportdata, chatId, sitename, reportHeaderRenames, reportTime, reportTo, email) {
+
+async function populateObjects(reportdata, chatId, sitename, reportHeaderRenames, reportTime, reportTo, email, reportnameDate, flag) {
 
 
 
-    const report_name = `${sitename}_report.pdf`;
+    const report_name = `${sitename}, ${reportnameDate}.pdf`;
 
     //creating pdf report here
     PDFTableGenerator(reportdata, sitename, report_name, reportHeaderRenames)
@@ -16,35 +17,34 @@ async function populateObjects(reportdata, chatId, sitename, reportHeaderRenames
             // Handle the generated PDF buffer
             console.log('PDF generation successful');
 
-
-            if (reportTo == 'Email') {
-                //email helper
-                console.log(reportTo)
-                 await handleEmailNotification(email, reportTime, pdfBuffer, sitename, `${sitename}_report.pdf`);
-
+            switch (reportTo) {
+                case 'Email':
+                    // Email helper
+                    await handleEmailNotification(email, reportTime, pdfBuffer, sitename, report_name);
+                    break;
+            
+                case 'Telegram':
+                    // Send to Telegram based on the flag
+                    flag === "test" 
+                        ? await handleTelegramNotification('-4019893816', pdfBuffer, report_name) 
+                        : await handleTelegramNotification(chatId, pdfBuffer, report_name);
+                    break;
+            
+                case 'Telegram & Email':
+                    // Send to both Telegram and Email based on the flag
+                    flag === "test"
+                        ? (await handleTelegramNotification('-4019893816', pdfBuffer, report_name),
+                           await handleEmailNotification("report-testing@omniscience.digital", reportTime, pdfBuffer, sitename, report_name))
+                        : (await handleEmailNotification(email, reportTime, pdfBuffer, sitename, report_name),
+                           await handleTelegramNotification(chatId, pdfBuffer, report_name));
+                    break;
+            
+                default:
+                    // Handle cases where reportTo doesn't match any expected values
+                    console.error("Invalid reportTo value:", reportTo);
+                    break;
             }
-            else if (reportTo == 'Telegram') {
-                console.log(reportTo)
-               // await handleTelegramNotification('-4019893816', pdfBuffer, `${sitename}_report.pdf`);
-                 await handleTelegramNotification(chatId, pdfBuffer, `${sitename}_report.pdf`);
-
-            }
-            else if (reportTo == 'Telegram & Email') {
-                console.log(reportTo)
-
-                // Send the PDF buffer to Telegram with the specified caption
-                //await handleTelegramNotification('-4019893816', pdfBuffer, `${sitename}_report.pdf`);
-                  await handleTelegramNotification(chatId, pdfBuffer, `${sitename}_report.pdf`);
-
-                //email helper
-
-                 await handleEmailNotification(email, reportTime, pdfBuffer, sitename, `${sitename}_report.pdf`);
-
-               // await handleEmailNotification("thabiso@omniscience.digital", reportTime, pdfBuffer, sitename, `${sitename}_report.pdf`);
-            }
-
-
-
+            
 
         })
         .catch((error) => {

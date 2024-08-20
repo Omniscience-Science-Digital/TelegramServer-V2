@@ -35,9 +35,10 @@ module.exports.headers_helper = (shift, reportDataArray, monthStart, endTime, st
 
    
 
+        let d = new Date();
 
         if (shift === 'day' || shift === 'day2') {
-            const d = new Date();
+             
             let date_current = d.toString().split(' ').slice(0, 1).join(' ') + ' ' + d.getDate() + ' ' + d.toLocaleString('default', { month: 'short' }) + ' ' + d.getFullYear();
 
 
@@ -46,7 +47,7 @@ module.exports.headers_helper = (shift, reportDataArray, monthStart, endTime, st
 
 
         else if (shift === 'night') {
-            const d = new Date();
+             
             d.setDate(d.getDate() - 1);
 
             let date_current = d.toString().split(' ').slice(0, 1).join(' ') + ' ' + d.getDate() + ' ' + d.toLocaleString('default', { month: 'short' }) + ' ' + d.getFullYear();
@@ -55,9 +56,13 @@ module.exports.headers_helper = (shift, reportDataArray, monthStart, endTime, st
         }
 
 
+    
+
+        let reportnameDate = d.toISOString().split('T')[0]  + '  ' + endTime;
+        let reportDateTime =  shiftData[0][1].text;
 
 
-            return    shiftData[0][1].text;
+         return   {reportnameDate ,reportDateTime} ;
 
 
     } catch (error) {

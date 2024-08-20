@@ -207,13 +207,6 @@ async function handleShiftons(myflowBuffer, shift, startTime, endTime, startdate
         throw error; // Optionally rethrow to propagate the error further
     }
 
-
-
-
-
-
-
-
 }
 
 async function handlePlcShiftons(myflowBuffer,plcIccid, shift, startTime, endTime, startdate, enddate, scales, monthstart, primaryScalesArray, mtd_target, scaleType, canvas,virtualDatapoints,maxUtilization) {
@@ -238,7 +231,6 @@ async function handlePlcShiftons(myflowBuffer,plcIccid, shift, startTime, endTim
             };
 
     
-
 
             if (data.openingScaletons !== '') {
                 const mtdTonns = await monthToDatePlcwithOpeningsToDate(endTime, enddate, data.iccid,plcIccid, data.openingScaletons)
@@ -300,8 +292,6 @@ async function handlePlcShiftons(myflowBuffer,plcIccid, shift, startTime, endTim
         
             let shift_tons = await hourlyPlcShifttons(shift,startTime, endTime, startdate, enddate, data.iccid,plcIccid);
        
-        
-   
             var shiftonsranges = groupByTimeIntervals(timeintervals, shift_tons.hourlytons);
         
         
@@ -320,14 +310,11 @@ async function handlePlcShiftons(myflowBuffer,plcIccid, shift, startTime, endTim
                             dailytons += parseFloat(shift_tons.Shifttons[0]);
                             
                         }
-                   
-                 
+                               
                 }
 
 
     
-            
-
             const formattedData = {
                 key: data.scaleName, // Assign to ScaleName instead of data.scaleName
                 Shifttons: shiftonsranges,
@@ -339,7 +326,6 @@ async function handlePlcShiftons(myflowBuffer,plcIccid, shift, startTime, endTim
         
 
         
-
         if (scaleType === 'parallel') {
             
             mtd_achieved = parseFloat(mtd_achieved / primaryScaleslen)
@@ -417,12 +403,6 @@ async function handlePlcShiftons(myflowBuffer,plcIccid, shift, startTime, endTim
         console.error(`Error in seriescaleCalcsFunc:`, error);
         throw error; // Optionally rethrow to propagate the error further
     }
-
-
-
-
-
-
 
 
 }

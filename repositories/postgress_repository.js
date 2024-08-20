@@ -105,9 +105,6 @@ const shiftTonsplc = async (startTime, endTime, startdate, enddate, title, plcIc
           `;
 
 
-
-
-
     const result = await db.query(query);
 
 
@@ -225,6 +222,7 @@ const startingHourtons = async (startTime, endTime, startdate, enddate, iccid, m
     throw error;
   }
 }
+
 const startingPlcHourtons = async (shift, startTime, endTime, startdate, enddate, title, plcIccid) => {
 
   // Split the startTime string into hours and minutes
@@ -375,10 +373,6 @@ exports.hourlyShifttons = async (shift, startTime, endTime, startdate, enddate, 
 
 
 
-
-
-
-
     // Initialize the result array
     const differences = [];
     let accumulating_sum = 0;
@@ -392,14 +386,15 @@ exports.hourlyShifttons = async (shift, startTime, endTime, startdate, enddate, 
         let diff = (num2 - num1);
         if (diff < 0)
           diff = 0
-        accumulating_sum += (diff)
+         accumulating_sum += (diff)
+       
+      
 
         differences.push(parseFloat(accumulating_sum).toFixed(2));
       } else {
         console.error(`Invalid data at index ${i - 1} or ${i}`);
       }
     }
-
 
 
     return { Shifttons: Shifttons, Accumulating_Sum: parseFloat(accumulating_sum).toFixed(2), hourlytons: differences };
@@ -422,17 +417,15 @@ exports.hourlyPlcShifttons = async (shift, startTime, endTime, startdate, enddat
     //for period shift tons
     const Shifttons = await shiftTonsplc(startTime, endTime, startdate, enddate, title, plcIccid);
 
+ 
 
     //hourly Shift tons
-    const myData = await startingPlcHourtons(shift, startTime, endTime, startdate, enddate, title, plcIccid);
-
-
-
-
+    let myData = await startingPlcHourtons(shift, startTime, endTime, startdate, enddate, title, plcIccid);
 
     // Initialize the result array
     const differences = [];
     let accumulating_sum = 0;
+
 
     // Calculate differences with error handling
     for (let i = 1; i < myData.length; i++) {
@@ -440,16 +433,23 @@ exports.hourlyPlcShifttons = async (shift, startTime, endTime, startdate, enddat
       const num2 = parseFloat(myData[i]);
 
       if (!isNaN(num1) && !isNaN(num2)) {
+        
         let diff = (num2 - num1);
+        //console.log(num2 + ' - ' + num1 + ' = ' + (num2 - num1));
+
         if (diff < 0)
           diff = 0
         accumulating_sum += (diff)
 
+      
+
+        
         differences.push(parseFloat(accumulating_sum).toFixed(2));
       } else {
         console.error(`Invalid data at index ${i - 1} or ${i}`);
       }
     }
+
 
 
 
