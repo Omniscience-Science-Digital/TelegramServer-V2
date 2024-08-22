@@ -9,8 +9,8 @@ const timeZone = 'Africa/Johannesburg';
 
 //testing script
 
-//let runprod_test ="Prod";
-let runprod_test ="test";
+let runprod_test ="Prod";
+// let runprod_test ="test";
 
 (async () => {
     try {
