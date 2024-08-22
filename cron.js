@@ -9,16 +9,14 @@ const timeZone = 'Africa/Johannesburg';
 
 //testing script
 
+//let runprod_test ="Prod";
+let runprod_test ="test";
+
 (async () => {
     try {
-
-
-        // const items = await scanDynamoDBTableDay('22:00');
-        // const extrashiftitems = await scanDynamoDBTableExtraShift('22:00');
-
-        // await report_controller.reportdata(items, "day", "test");
-        // await report_controller.reportdata(extrashiftitems, "day2", "test");
-
+            // This cron job triggers every day at 6 PM SAST
+    // const items = await scanDynamoDBTableNight('06:30');
+    // await report_controller.reportdata(items, "night", runprod_test);
 
 
     } catch (error) {
@@ -29,59 +27,59 @@ const timeZone = 'Africa/Johannesburg';
 
 /**Day Cron Jobs **/
 
-cron.schedule('5 14 * * *', async () => {
+cron.schedule('0 14 * * *', async () => {
     // This cron job triggers every day at 2 PM SAST
     const items = await scanDynamoDBTableDay('14:00');
-    await report_controller.reportdata(items, "day", "Prod");
+    await report_controller.reportdata(items, "day", runprod_test);
 
 }, { timezone: timeZone });
 
 
-cron.schedule('5 16 * * *', async () => {
+cron.schedule('0 16 * * *', async () => {
     // This cron job triggers every day at 4 PM SAST
     const items = await scanDynamoDBTableDay('16:00');
-    await report_controller.reportdata(items, "day", "Prod");
+    await report_controller.reportdata(items, "day", runprod_test);
 
 
 }, { timezone: timeZone });
 
-cron.schedule('5 18 * * *', async () => {
+cron.schedule('0 18 * * *', async () => {
     // This cron job triggers every day at 6 PM SAST
 
     const items = await scanDynamoDBTableDay('18:00');
-    await report_controller.reportdata(items, "day", "Prod");
+    await report_controller.reportdata(items, "day", runprod_test);
 
 
 }, { timezone: timeZone });
 
 
 
-cron.schedule('35 18 * * *', async () => {
+cron.schedule('30 18 * * *', async () => {
     // This cron job triggers every day at 6:30 PM SAST
     const items = await scanDynamoDBTableDay('18:30');
-    await report_controller.reportdata(items, "day", "Prod");
+    await report_controller.reportdata(items, "day", runprod_test);
 
 
 }, { timezone: timeZone });
 
-cron.schedule('5 19 * * *', async () => {
+cron.schedule('0 19 * * *', async () => {
     // This cron job triggers every day at 7 PM SAST
     const items = await scanDynamoDBTableDay('19:00');
-    await report_controller.reportdata(items, "day", "Prod");
+    await report_controller.reportdata(items, "day", runprod_test);
 
 }, { timezone: timeZone });
 
 
 
-cron.schedule('5 22 * * *', async () => {
+cron.schedule('0 22 * * *', async () => {
     // This cron job triggers every day at 22 PM SAST
 
-    const items = await scanDynamoDBTableDay('22:00', "Prod");
+    const items = await scanDynamoDBTableDay('22:00');
     //extrashift items
     const extrashiftitems = await scanDynamoDBTableExtraShift('22:00')
 
-    await report_controller.reportdata(items, "day", "Prod");
-    await report_controller.reportdata(extrashiftitems, "day2", "Prod");
+    await report_controller.reportdata(items, "day", runprod_test);
+    await report_controller.reportdata(extrashiftitems, "day2", runprod_test);
 
 
 }, { timezone: timeZone });
@@ -89,10 +87,10 @@ cron.schedule('5 22 * * *', async () => {
 
 
 
-cron.schedule('5 0 * * *', async () => {
+cron.schedule('0 0 * * *', async () => {
     // This cron job triggers every day at 12 AM SAST
     const items = await scanDynamoDBTableDay('00:00');
-    await report_controller.reportdata(items, "day", "Prod");
+    await report_controller.reportdata(items, "day", runprod_test);
 
 
 }, { timezone: timeZone });
@@ -100,54 +98,54 @@ cron.schedule('5 0 * * *', async () => {
 
 
 ///**************************Night SHIFT CRON*****************************///
-cron.schedule('5 2 * * *', async () => {
+cron.schedule('0 2 * * *', async () => {
     // This cron job triggers every day at 2 AM SAST
     const items = await scanDynamoDBTableNight('02:00');
-    await report_controller.reportdata(items, "night", "Prod");
+    await report_controller.reportdata(items, "night", runprod_test);
 
 }, { timezone: timeZone });
 
 
-cron.schedule('5 5 * * *', async () => {
+cron.schedule('0 5 * * *', async () => {
     // This cron job triggers every day at 6 PM SAST
     const items = await scanDynamoDBTableNight('05:00');
-    await report_controller.reportdata(items, "night", "Prod");
+    await report_controller.reportdata(items, "night", runprod_test);
 
 
 }, { timezone: timeZone });
 
 
-cron.schedule('5 6 * * *', async () => {
+cron.schedule('0 6 * * *', async () => {
     // This cron job triggers every day at 6 AM SAST
     const items = await scanDynamoDBTableNight('06:00');
-    await report_controller.reportdata(items, "night", "Prod");
+    await report_controller.reportdata(items, "night", runprod_test);
 
 
 }, { timezone: timeZone });
 
-cron.schedule('35 6 * * *', async () => {
+cron.schedule('30 6 * * *', async () => {
     // This cron job triggers every day at 6:30 AM SAST
     const items = await scanDynamoDBTableNight('06:30');
-    await report_controller.reportdata(items, "night", "Prod");
+    await report_controller.reportdata(items, "night", runprod_test);
 
 
 
 }, { timezone: timeZone });
 
-cron.schedule('5 7 * * *', async () => {
+cron.schedule('0 7 * * *', async () => {
     // This cron job triggers every day at 7 AM SAST
     const items = await scanDynamoDBTableNight('07:00');
-    await report_controller.reportdata(items, "night", "Prod");
+    await report_controller.reportdata(items, "night", runprod_test);
 
 
 }, { timezone: timeZone });
 
 
-cron.schedule('5 12 * * *', async () => {
+cron.schedule('0 12 * * *', async () => {
     // This cron job triggers every day at 12 PM SAST
 
     const items = await scanDynamoDBTableNight('12:00');
-    await report_controller.reportdata(items, "night", "Prod");
+    await report_controller.reportdata(items, "night", runprod_test);
 
 
 }, { timezone: timeZone });

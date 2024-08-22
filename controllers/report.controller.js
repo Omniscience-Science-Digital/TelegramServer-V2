@@ -20,7 +20,7 @@ exports.runReportdata = async (req, res) => {
     
 
    
-    let item, startTime, runtime,email, sitestatus, dayStart, primaryScalesArray, endTime, sitename, runningtph, maxUtilization, chatId, totalMonthTarget, startDay, scaleType, flowtitle, flowiccid, plcIccid, scales;
+    let item, startTime, runtime,reportTo,email, sitestatus, dayStart, primaryScalesArray, endTime, sitename, runningtph, maxUtilization, chatId, totalMonthTarget, startDay, scaleType, flowtitle, flowiccid, plcIccid, scales;
 
 
     let items = report;
@@ -78,6 +78,7 @@ exports.runReportdata = async (req, res) => {
             maxUtilization = item.maxUtilization?.N || '';
             plcIccid = item.plcIccid?.S || '';
             email = item.email?.S || '';
+            reportTo = item.reportTo?.S || '';
 
             const chartIDTest ='-4019893816';
 
@@ -136,7 +137,7 @@ exports.runReportdata = async (req, res) => {
 
            let {reportnameDate ,reportDateTime}= await headers_helper(shift, reportDataArray, monthstart, endTime, startTime);
                        
-           await populateObjects(reportDataArray, chartIDTest, sitename, reportHeaderRenames,reportDateTime,"Telegram",email,reportnameDate,"test");
+           await populateObjects(reportDataArray, chartIDTest, sitename, reportHeaderRenames,reportDateTime,reportTo,email,reportnameDate,"test");
         }
     } catch (error) {
         console.error('Error in reportdata:', error); // Log the error

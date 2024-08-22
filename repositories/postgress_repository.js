@@ -62,7 +62,6 @@ const shiftTons = async (startTime, endTime, startdate, enddate, iccid, modbus_k
     }
 
 
-
     const result = await db.query(query);
 
 
