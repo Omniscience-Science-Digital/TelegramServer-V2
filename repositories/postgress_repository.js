@@ -514,7 +514,7 @@ exports.getPlcFlowValues = async (startTime, endTime, startdate, enddate, title,
         date ASC;      
       `;
 
-
+      
     const result = await db.query(query);
 
 
@@ -869,7 +869,6 @@ exports.ActualPlcStart = async (startTime, endTime, startdate, enddate, plcIccid
       `;
 
 
-
     const result = await db.query(query);
 
     const actualStart = result.rows.map(row => row);
@@ -912,6 +911,104 @@ exports.ActualPlcEnd = async (startTime, endTime, startdate, enddate, plcIccid, 
         iccid;
           
       `;
+
+    const result = await db.query(query);
+
+    const actualStart = result.rows.map(row => row);
+
+
+    return actualStart;
+  } catch (error) {
+    console.error('Error listing actualStart tables:', error);
+    throw error;
+  }
+};
+
+
+
+//parallel Actual Plc start
+
+
+exports.ActualPlcParallelStart = async (startTime, endTime, startdate, enddate,  flowtitle, flowiccid,  runningtph) => {
+  try {
+    const query = `WITH FlowData AS (
+          SELECT
+            title,
+            CAST(value AS numeric) AS value,
+            date,
+            LAG(CAST(value AS numeric)) OVER (ORDER BY date) AS prev_value,
+            LEAD(CAST(value AS numeric)) OVER (ORDER BY date) AS next_value
+          FROM
+          public.devicelogs_production_${flowiccid}
+          WHERE
+          title='${flowtitle}'
+          
+          AND date BETWEEN '${startdate} ${startTime}' AND '${enddate} ${endTime}'
+        )
+        SELECT
+          MIN(date) AS first_time_above_10
+        FROM (
+          SELECT
+
+            date,
+            value,
+            LEAD(CAST(value AS numeric)) OVER (ORDER BY date) AS next_value,
+            LEAD(CAST(value AS numeric), 2) OVER (ORDER BY date) AS second_next_value
+          FROM
+            FlowData
+        ) subquery
+        WHERE
+          CAST(value AS numeric) > ${runningtph}
+          AND CAST(next_value AS numeric) > ${runningtph}
+          AND CAST(second_next_value AS numeric) > ${runningtph}
+     
+      `;
+
+    
+
+    const result = await db.query(query);
+
+    const actualStart = result.rows.map(row => row);
+
+
+    return actualStart;
+  } catch (error) {
+    console.error('Error listing actualStart tables:', error);
+    throw error;
+  }
+};
+
+
+exports.ActualPlcParallelEnd = async (startTime, endTime, startdate, enddate, flowtitle, flowiccid, runningtph) => {
+  try {
+    const query = ` WITH FlowData AS (
+        SELECT
+            iccid,
+            title,
+            CAST(value AS numeric) AS value,
+            date,
+            LAG(CAST(value AS numeric)) OVER (ORDER BY date) AS prev_value,
+            LAG(CAST(value AS numeric), 2) OVER (ORDER BY date) AS second_prev_value
+        FROM
+        public.devicelogs_production_${flowiccid}
+        WHERE
+        title='${flowtitle}'
+          AND date BETWEEN '${startdate} ${startTime}' AND '${enddate} ${endTime}'
+    )
+    SELECT
+        iccid,
+        MAX(date) AS last_time_above_10
+    FROM
+        FlowData
+    WHERE
+        CAST(value AS numeric) > ${runningtph}
+        AND CAST(prev_value AS numeric) > ${runningtph}
+        AND CAST(second_prev_value AS numeric) > ${runningtph}
+    GROUP BY
+        iccid;
+          
+      `;
+
 
     const result = await db.query(query);
 
@@ -1031,11 +1128,11 @@ exports.plcScaleFlow = async (startTime, endTime, startdate, enddate, iccid, tit
         `;
 
 
+
     const result = await db.query(query);
 
     // Extract the "shifttons" value from the rows
     const flowdata = result.rows[0];
-
 
 
 
@@ -1182,7 +1279,7 @@ exports.runtimePlcFlow = async (startTime, endTime, startdate, enddate, plcIccid
         
       `;
 
-      
+
 
     const result = await db.query(query);
 
@@ -1234,7 +1331,6 @@ exports.runtimePlcAllscalesFlow = async (startTime, endTime, startdate, enddate,
         
       `;
 
-      
 
     const result = await db.query(query);
 

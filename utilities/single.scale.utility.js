@@ -1,21 +1,20 @@
 const { singleScaleFlow, runtimeFlow, ActualStart, ActualEnd, runtimeAccumulatingSingleFlow } = require('../repositories/postgress_repository');
 const { calculateTotalHours, addTwoHours } = require("./time.utility");
 
-async function singlecaleCalcsFunc(shift, shifts_Ran, monthstart, shift, startTime, endTime, startdate, enddate, runningtph, maxUtilization, scales, primaryScalesArray) {
+async function singlecaleCalcsFunc(shift, monthstart, shift, startTime, endTime, startdate, enddate, runningtph, maxUtilization, scales, primaryScalesArray) {
     try {
-
+        
+       
         const primaryScaleIccid = scales.find(scale => scale.scaleName.S === primaryScalesArray[0]).iccid.S;
-
+           
         // Get flow values
         let flowvalues = await singleScaleFlow(startTime, endTime, startdate, enddate, primaryScaleIccid, runningtph)
 
-
-    
+        
         // // Calculate max utilization
         var { total_count, average_flow, count_above_runningflow, average_flow_above_runningflow, sum_above_runningflow, availability } = flowvalues;
 
     
-
         if (isNaN(availability) || availability < 0 || !isFinite(availability)) {
             availability = 0;
         }
@@ -37,20 +36,15 @@ async function singlecaleCalcsFunc(shift, shifts_Ran, monthstart, shift, startTi
         var { hours, minutes } = calculateTotalHours(startTime, endTime);
 
      
+        var flowstarttime = (shift == 'night') ? endTime : startTime;
 
+        // hours = parseFloat(hours * shifts_Ran)
+        //if it's accumulating 
+        mtdruntime = await runtimeAccumulatingSingleFlow(flowstarttime, endTime, monthstart, enddate, runningtph, primaryScaleIccid);
 
-            var flowstarttime = (shift == 'night') ? endTime : startTime;
-
-           // hours = parseFloat(hours * shifts_Ran)
-            //if it's accumulating 
-            mtdruntime = await runtimeAccumulatingSingleFlow(flowstarttime, endTime, monthstart, enddate, runningtph, primaryScaleIccid);
-
-            runtime = await runtimeFlow(startTime, endTime, startdate, enddate, runningtph, primaryScaleIccid);
+        runtime = await runtimeFlow(startTime, endTime, startdate, enddate, runningtph, primaryScaleIccid);
 
         
-  
-
-
 
         const sum_of_time_delta_in_hours = runtime[0]?.sum_of_time_delta_in_hours || 0;
         const sum_of_time_delta_in_mtd_hours = mtdruntime[0]?.sum_of_time_delta_in_hours || 0;

@@ -1,13 +1,12 @@
 const { averageFlowWithIccid, runtimeFlowIccid, ActualStart, ActualEnd, runtimeAccumulatingFlow } = require('../repositories/postgress_repository');
 const { calculateTotalHours, addTwoHours } = require("./time.utility");
 
-async function seriescaleCalcsFunc(shift, shifts_Ran, startTime, endTime, flowtitle, flowiccid, startdate, enddate, runningtph, maxUtilization, scales, primaryScalesArray) {
+async function seriescaleCalcsFunc(shift, startTime, endTime, flowtitle, flowiccid, startdate, enddate, runningtph, maxUtilization, scales, primaryScalesArray) {
     try {
 
-
+  
         // Get flow values
         let flowvalues = await averageFlowWithIccid(startTime, endTime, startdate, enddate, flowtitle, flowiccid, runningtph);
-
 
         // Calculate max utilization
         var { total_count, average_flow, count_above_runningflow, average_flow_above_runningflow, sum_above_runningflow, availability } = flowvalues;

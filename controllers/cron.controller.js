@@ -1,8 +1,9 @@
 const { performance } = require('perf_hooks');
-const { singleScale, seriesScale, parallelScale, plcScale } = require("../utilities/shift_utility");
+const { singleScale, seriesScale, parallelScale, plcScale,plcParallelScale } = require("../utilities/shift_utility");
 const { dertemine_numberofShifts, getCurrentDateFormatted } = require('../utilities/time.utility');
 const { populateObjects } = require('../services/telegram.service');
 const { headers_helper } = require('../helpers/headers.helper');
+const {parseScales}= require('../helpers/scalesCalc.helper');
 const { canvas } = require('../resources/static.headers.resource');
 
 exports.reportdata = async (sites, shift, flag) => {
@@ -11,7 +12,7 @@ exports.reportdata = async (sites, shift, flag) => {
 
     let reportDataArray;
 
-    let item, startTime, sitestatus, dayStart, primaryScalesArray, endTime, sitename, runningtph, maxUtilization, chatId, totalMonthTarget, allmtds, scaleType, flowtitle, flowiccid, plcIccid, scales, reportTo, email;
+    let item, startTime, sitestatus, dayStart, primaryScalesArray, endTime, sitename, runningtph, maxUtilization, chatId, totalMonthTarget, scaleType, flowtitle, flowiccid, plcIccid, scales, reportTo, email;
 
     let items = sites;
 
@@ -26,13 +27,15 @@ exports.reportdata = async (sites, shift, flag) => {
         if (!sitestatus) continue;
 
 
-        //   if(sitename!=="Gaudini")continue;
+        // if (sitename !== 'Blou - Test') continue;
 
 
-        console.log(sitename + ' : ');
+        console.log('sitename' + ' : '+sitename);
 
         // Get current running date
         let enddate = getCurrentDateFormatted();
+
+
 
 
         // Handle shift times
@@ -52,8 +55,6 @@ exports.reportdata = async (sites, shift, flag) => {
 
 
         chatId = item.telegramid?.S || '';
-        allmtds = item.allmtds?.S || '',
-            runtime = item.runtime?.N;
         totalMonthTarget = item.TotalmonthTarget?.S || '';
         scaleType = item.scale_type?.S || '';
         monthstart = item.monthstart?.S || '';
@@ -74,6 +75,8 @@ exports.reportdata = async (sites, shift, flag) => {
 
         scales = item.Telegramscales || [];
 
+        
+
         primaryScalesArray = primaryScales?.L?.map((scale) => scale.S) || [];
         const plcflowArray = parseScales(plcFlow);
         const cyclonegraphArray = parseScales(cyclonegraph);
@@ -88,31 +91,42 @@ exports.reportdata = async (sites, shift, flag) => {
 
 
         try {
-            if (scaleType === 'single') {
-                console.log('Processing single scale type'); // Additional log for debugging
-                reportDataArray = await singleScale(startTime, endTime, scales, monthstart, shift, primaryScalesArray, runningtph, maxUtilization, mtd_target, scaleType, canvas, formulas, virtualDatapoints, shifts_Ran);
-            } else if (scaleType === 'series') {
-                console.log('Processing series scale type'); // Additional log for debugging
-                reportDataArray = await seriesScale(startTime, endTime, scales, monthstart, flowtitle, flowiccid, shift, primaryScalesArray, runningtph, maxUtilization, mtd_target, scaleType, canvas, formulas, virtualDatapoints, shifts_Ran);
-            } else if (scaleType === 'parallel') {
-                console.log('Processing parallel scale type'); // Additional log for debugging
-                reportDataArray = await parallelScale(startTime, endTime, scales, monthstart, flowtitle, flowiccid, shift, primaryScalesArray, runningtph, maxUtilization, mtd_target, scaleType, canvas, formulas, virtualDatapoints, shifts_Ran);
-            } else if (plcIccid) {
-                console.log('Processing plc scale type'); // Additional log for debugging
-                reportDataArray = await plcScale(startTime, endTime, scales, plcIccid, plcflowArray, cyclonegraphArray, monthstart, shift, primaryScalesArray, runningtph, maxUtilization, mtd_target, scaleType, canvas, formulas, virtualDatapoints, shifts_Ran);
+            if (!plcIccid) {
+                switch (scaleType) {
+                    case 'single':
+                        console.log('Processing single scale type');
+                        reportDataArray = await singleScale(startTime, endTime, scales, monthstart, shift, primaryScalesArray, runningtph, maxUtilization, mtd_target, scaleType, canvas, formulas, virtualDatapoints);
+                        break;
+                    case 'series':
+                        console.log('Processing series scale type');
+                        reportDataArray = await seriesScale(startTime, endTime, scales, monthstart, flowtitle, flowiccid, shift, primaryScalesArray, runningtph, maxUtilization, mtd_target, scaleType, canvas, formulas, virtualDatapoints);
+                        break;
+                    case 'parallel':
+                        console.log('Processing parallel scale type');
+                        reportDataArray = await parallelScale(startTime, endTime, scales, monthstart, flowtitle, flowiccid, shift, primaryScalesArray, runningtph, maxUtilization, mtd_target, scaleType, canvas, formulas, virtualDatapoints);
+                        break;
+                }
+            } else {
+                if (scaleType === 'parallel') {
+                    console.log('Processing plc parallel scale type'); // Additional log for debugging
+                   
+                    reportDataArray = await plcParallelScale(startTime, endTime, scales, plcIccid, plcflowArray,flowtitle, flowiccid, cyclonegraphArray, monthstart, shift, primaryScalesArray, runningtph, maxUtilization, mtd_target, scaleType, canvas, formulas, virtualDatapoints);
+                } else {
+                    console.log('Processing plc  scale type'); // Additional log for debugging
+                    reportDataArray = await plcScale(startTime, endTime, scales, plcIccid, plcflowArray, cyclonegraphArray, monthstart, shift, primaryScalesArray, runningtph, maxUtilization, mtd_target, scaleType, canvas, formulas, virtualDatapoints);
+                }
             }
-
-            // Handle headers objects
-
+        
+            // Additional header handling if needed
             let { reportnameDate, reportDateTime } = await headers_helper(shift, reportDataArray, monthstart, endTime, startTime);
-
-
             await populateObjects(reportDataArray, chatId, sitename, reportHeaderRenames, reportDateTime, reportTo, email, reportnameDate, flag);
+        
         } catch (error) {
-            console.error(`Error processing ${sitename}:`, error); // Log the error for the current site
+            console.error(`Error processing ${sitename}:`, error);
             // Optionally continue to the next iteration without stopping the loop
             continue;
         }
+        
     }
 
     const end = performance.now();
@@ -120,23 +134,4 @@ exports.reportdata = async (sites, shift, flag) => {
 };
 
 
-const parseScales = (scales) => {
-    // Access the L array inside the first element of scales
-    const sortedscales = scales?.L[0]?.L || [];
-
-    // Check if sortedscales is an array and map over it
-    return Array.isArray(sortedscales) ? sortedscales.map((scale) => {
-        // Get the key of the object inside scale.M
-        const scaleKey = Object.keys(scale.M)[0];
-
-        // Get the value of the key, assuming it has a nested structure with S property
-        const scaleValue = scale.M[scaleKey]?.S || '';
-
-        // Create the scale object
-        const scaleObject = {};
-        scaleObject[scaleKey] = scaleValue;
-
-        return scaleObject;
-    }) : [];
-};
 

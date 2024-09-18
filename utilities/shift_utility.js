@@ -2,15 +2,16 @@ const { subtractTwoHours, getCurrentDateFormatted, getPreviousDateFormatted } = 
 const { seriescaleCalcsFunc } = require('./series.scale.utility');
 const { singlecaleCalcsFunc } = require('./single.scale.utility');
 const { parallelcaleCalcsFunc } = require('./parallel.scale.utility')
-const { plcScaleCalcsFunc } = require('./plc.scale.utility.js')
+const { plcScaleCalcsFunc,plcScale_noTypeCalcsFunc } = require('./plc.scale.utility.js')
 const { handleShiftons ,handlePlcShiftons} = require('./shiftons.utility');
 const { flowutility ,flowObjectValues,flowDataPLC,flowObjectDataPLC,cycloneDataPLC} = require('./flow.utility');
 const { calculatorCalculations } = require('./formulas.utility');
 const { createDonutChart } = require('../helpers/charts/chart_helper');
+const {samePlantCalc_ProcessScales,clearHashKeys}= require('../helpers/scalesCalc.helper');
 
 
 
-module.exports.singleScale = async (startTime, endTime, scales, monthstart, shift, primaryScalesArray, runningtph, maxUtilization, mtd_target, scaleType, canvas, formulas, virtualDatapoints,shifts_Ran) => {
+module.exports.singleScale = async (startTime, endTime, scales, monthstart, shift, primaryScalesArray, runningtph, maxUtilization, mtd_target, scaleType, canvas, formulas, virtualDatapoints) => {
     try {
 
         //pass correct dt  time
@@ -22,22 +23,27 @@ module.exports.singleScale = async (startTime, endTime, scales, monthstart, shif
 
         let startdate = (shift === 'day') ? getCurrentDateFormatted() : getPreviousDateFormatted();
         let enddate = getCurrentDateFormatted();
-        
+     
 
         //get   flow graphs
 
-        const myflowBuffer = await flowutility(postgress_start, postgress_end, startdate, enddate, scales, canvas);
+        //removing scales from shared plants
+        let newscales= samePlantCalc_ProcessScales(scales);
 
+        const myflowBuffer = await flowutility(postgress_start, postgress_end, startdate, enddate, newscales, canvas);
 
-        const myflowObject = await flowObjectValues(postgress_start, postgress_end, startdate, enddate,runningtph, scales);
+           
+        const myflowObject = await flowObjectValues(postgress_start, postgress_end, startdate, enddate,runningtph, newscales);
     
-
+        
 
         //check if site ran
-        let flow_Values = await singlecaleCalcsFunc(shift,shifts_Ran,monthstart,shift,postgress_start, postgress_end, startdate, enddate, runningtph, maxUtilization, scales, primaryScalesArray)
+        let flow_Values = await singlecaleCalcsFunc(shift,monthstart,shift,postgress_start, postgress_end, startdate, enddate, runningtph, maxUtilization, scales, primaryScalesArray)
+        
         //handle shift tons 
         let tonnage = await handleShiftons(myflowBuffer, shift, postgress_start, postgress_end, startdate, enddate, scales, monthstart, primaryScalesArray, mtd_target, scaleType, canvas, virtualDatapoints,maxUtilization)
 
+      
 
         let shiftStats = await calculatorCalculations(formulas, tonnage, flow_Values)
         //plot pie charts
@@ -56,6 +62,10 @@ module.exports.singleScale = async (startTime, endTime, scales, monthstart, shif
   
         shift_statisticsPie = { shift_statisticsPie }
 
+    
+       tonnage= clearHashKeys(tonnage);
+
+        
         const combinedObject = { ...flow_Values,...{cyclonegraphbuffer}, ...tonnage, ...shift_statisticsPie, ...{ primaryScalesArray },...shiftStats,...{myflowObject} };
 
 
@@ -67,7 +77,7 @@ module.exports.singleScale = async (startTime, endTime, scales, monthstart, shif
     }
 }
 
-module.exports.seriesScale = async (startTime, endTime, scales, monthstart, flowtitle, flowiccid, shift, primaryScalesArray, runningtph, maxUtilization, mtd_target, scaleType, canvas, formulas, virtualDatapoints,shifts_Ran) => {
+module.exports.seriesScale = async (startTime, endTime, scales, monthstart, flowtitle, flowiccid, shift, primaryScalesArray, runningtph, maxUtilization, mtd_target, scaleType, canvas, formulas, virtualDatapoints) => {
     try {
 
         //pass correct dt  time
@@ -81,17 +91,17 @@ module.exports.seriesScale = async (startTime, endTime, scales, monthstart, flow
 
         //get   flow graphs
 
-    
-        const myflowBuffer = await flowutility(postgress_start, postgress_end, startdate, enddate, scales, canvas);
+        //removing scales from shared plants
+        let newscales= samePlantCalc_ProcessScales(scales);
 
 
+        const myflowBuffer = await flowutility(postgress_start, postgress_end, startdate, enddate, newscales, canvas);
+
         //check if site ran
-        //check if site ran
-        let flow_Values = await seriescaleCalcsFunc(shift,shifts_Ran,postgress_start, postgress_end, flowtitle, flowiccid, startdate, enddate, runningtph, maxUtilization, scales, primaryScalesArray)
+        let flow_Values = await seriescaleCalcsFunc(shift,postgress_start, postgress_end, flowtitle, flowiccid, startdate, enddate, runningtph, maxUtilization, scales, primaryScalesArray)
 
         //perscale flow average , run time and max
-
-        const myflowObject = await flowObjectValues(postgress_start, postgress_end, startdate, enddate,runningtph, scales);
+        const myflowObject = await flowObjectValues(postgress_start, postgress_end, startdate, enddate,runningtph, newscales);
 
 
         //handle shift tons 
@@ -114,6 +124,8 @@ module.exports.seriesScale = async (startTime, endTime, scales, monthstart, flow
 
         shift_statisticsPie = { shift_statisticsPie }
 
+        tonnage= clearHashKeys(tonnage);
+
         const combinedObject = { ...flow_Values,...{cyclonegraphbuffer}, ...tonnage, ...shift_statisticsPie, ...{ primaryScalesArray },...shiftStats ,...{myflowObject}};
 
         return combinedObject;
@@ -124,7 +136,7 @@ module.exports.seriesScale = async (startTime, endTime, scales, monthstart, flow
     }
 }
 
-module.exports.parallelScale = async (startTime, endTime, scales, monthstart, flowtitle, flowiccid, shift, primaryScalesArray, runningtph, maxUtilization, mtd_target, scaleType, canvas, formulas, virtualDatapoints,shifts_Ran) => {
+module.exports.parallelScale = async (startTime, endTime, scales, monthstart, flowtitle, flowiccid, shift, primaryScalesArray, runningtph, maxUtilization, mtd_target, scaleType, canvas, formulas, virtualDatapoints) => {
     try {
 
 
@@ -137,14 +149,17 @@ module.exports.parallelScale = async (startTime, endTime, scales, monthstart, fl
         let startdate = (shift === 'day') ? getCurrentDateFormatted() : getPreviousDateFormatted();
         let enddate = getCurrentDateFormatted();
 
+        
+        let newscales= samePlantCalc_ProcessScales(scales);
+
 
         //get   flow graphs
-        const myflowBuffer = await flowutility(postgress_start, postgress_end, startdate, enddate, scales, canvas);
+        const myflowBuffer = await flowutility(postgress_start, postgress_end, startdate, enddate, newscales, canvas);
 
-        const myflowObject = await flowObjectValues(postgress_start, postgress_end, startdate, enddate,runningtph, scales);
+        const myflowObject = await flowObjectValues(postgress_start, postgress_end, startdate, enddate,runningtph, newscales);
 
         //check if site ran
-        let flow_Values = await parallelcaleCalcsFunc(shift,shifts_Ran,postgress_start, postgress_end, flowtitle, flowiccid, startdate, enddate, runningtph, maxUtilization, scales, primaryScalesArray)
+        let flow_Values = await parallelcaleCalcsFunc(shift,postgress_start, postgress_end, flowtitle, flowiccid, startdate, enddate, runningtph, maxUtilization, scales, primaryScalesArray)
 
         //handle shift tons 
         let tonnage = await handleShiftons(myflowBuffer, shift, postgress_start, postgress_end, startdate, enddate, scales, monthstart, primaryScalesArray, mtd_target, scaleType, canvas, virtualDatapoints,maxUtilization)
@@ -165,6 +180,8 @@ module.exports.parallelScale = async (startTime, endTime, scales, monthstart, fl
 
         shift_statisticsPie = { shift_statisticsPie }
 
+        tonnage= clearHashKeys(tonnage);
+
         const combinedObject = { ...flow_Values,...{cyclonegraphbuffer}, ...tonnage, ...shift_statisticsPie, ...{ primaryScalesArray },...shiftStats ,...{myflowObject}};
 
 
@@ -183,9 +200,10 @@ module.exports.parallelScale = async (startTime, endTime, scales, monthstart, fl
 }
 
 
-module.exports.plcScale = async (startTime, endTime, scales,plcIccid,plcFlow,cyclonegraph, monthstart, shift, primaryScalesArray, runningtph, maxUtilization, mtd_target, scaleType,canvas,formulas,virtualDatapoints,shifts_Ran) => {
+module.exports.plcScale = async (startTime, endTime, scales,plcIccid,plcFlow,cyclonegraph, monthstart, shift, primaryScalesArray, runningtph, maxUtilization, mtd_target, scaleType,canvas,formulas,virtualDatapoints) => {
     try {
 
+       
         //pass correct dt  time
         var postgress_start = subtractTwoHours(startTime);
         var postgress_end = subtractTwoHours(endTime);
@@ -195,18 +213,18 @@ module.exports.plcScale = async (startTime, endTime, scales,plcIccid,plcFlow,cyc
         let startdate = (shift === 'day') ? getCurrentDateFormatted() : getPreviousDateFormatted();
         let enddate = getCurrentDateFormatted();
 
-
         //get   flow graphs
 
         const myflowBuffer = await flowDataPLC(postgress_start, postgress_end, startdate, enddate, plcFlow, canvas,plcIccid);
-
+        
         let cyclonegraphbuffer = await cycloneDataPLC(postgress_start, postgress_end, startdate, enddate, cyclonegraph, canvas,plcIccid);
   
+
+        
         //check if site ran
-        let flow_Values = await plcScaleCalcsFunc(shifts_Ran,monthstart,shift,postgress_start, postgress_end, startdate, enddate,plcFlow, runningtph, maxUtilization, scales, primaryScalesArray,plcIccid)
+        let flow_Values = await plcScale_noTypeCalcsFunc(monthstart,shift,postgress_start, postgress_end, startdate, enddate,plcFlow, runningtph, maxUtilization, scales, primaryScalesArray,plcIccid)
         
-        
-    
+
         const myflowObject = await flowObjectDataPLC(postgress_start, postgress_end, startdate, enddate, plcFlow,runningtph,plcIccid);
       
         //handle shift tons 
@@ -233,6 +251,63 @@ module.exports.plcScale = async (startTime, endTime, scales,plcIccid,plcFlow,cyc
 
 
         
+
+        return combinedObject;
+
+
+    } catch (error) {
+        console.log(`Error processing  parallel scale in shift utility: ${error} `)
+        throw error; // Optionally rethrow to propagate the error further
+    }
+
+}
+
+
+module.exports.plcParallelScale = async (startTime, endTime, scales,plcIccid,plcFlow,flowtitle, flowiccid,cyclonegraph, monthstart, shift, primaryScalesArray, runningtph, maxUtilization, mtd_target, scaleType,canvas,formulas,virtualDatapoints) => {
+    try {
+  
+
+        //pass correct dt  time
+        var postgress_start = subtractTwoHours(startTime);
+        var postgress_end = subtractTwoHours(endTime);
+
+        //get start and  end data 
+
+        let startdate = (shift === 'day') ? getCurrentDateFormatted() : getPreviousDateFormatted();
+        let enddate = getCurrentDateFormatted();
+
+
+        //get   flow graphs
+        const myflowBuffer = await flowDataPLC(postgress_start, postgress_end, startdate, enddate, plcFlow, canvas,plcIccid);
+    
+        let cyclonegraphbuffer ;
+  
+        //check if site ran
+        let flow_Values = await plcScaleCalcsFunc(monthstart,shift,postgress_start, postgress_end, startdate, enddate, runningtph, maxUtilization, scales, primaryScalesArray,plcIccid,flowtitle, flowiccid)
+        
+        
+        const myflowObject = await flowObjectDataPLC(postgress_start, postgress_end, startdate, enddate, plcFlow,runningtph,plcIccid);
+      
+        
+        //handle shift tons 
+        let tonnage = await handlePlcShiftons(myflowBuffer,plcIccid, shift, postgress_start, postgress_end, startdate, enddate, scales, monthstart, primaryScalesArray, mtd_target, scaleType, canvas, virtualDatapoints,maxUtilization)
+
+
+        let shiftStats = await calculatorCalculations(formulas, tonnage, flow_Values)
+        //plot pie charts
+
+        var shift_statisticsPie = [];
+        if (tonnage.site_had_production) {
+            shift_statisticsPie = await createDonutChart(shiftStats.shiftstats, canvas);
+
+        }
+
+        
+        shift_statisticsPie = { shift_statisticsPie }
+        const combinedObject = { ...flow_Values,...{cyclonegraphbuffer}, ...tonnage, ...shift_statisticsPie, ...{ primaryScalesArray },...shiftStats,...{myflowObject} };
+
+
+
 
         return combinedObject;
 

@@ -75,6 +75,90 @@ function processFormula(formula, variables) {
 
 
 
+
+
+
+// function processVirtualFormula(formula, variables) {
+
+//     console.log(formula)
+//     console.log(variables)
+//     // Replace null values with 0
+//     Object.keys(variables).forEach(key => {
+//         if (variables[key] === null) {
+//             variables[key] = '0';
+//         }
+//     });
+
+//     try {
+//         // Create a regular expression pattern to match variable names in the formula
+//         const variablePattern = new RegExp(Object.keys(variables).map(key => `\\b${key}\\b`).join('|'), 'g');
+
+//         // Replace variable names with their corresponding values
+//         const substitutedFormula = formula.replace(variablePattern, match => {
+//             // Handle negative values properly
+//             const value = parseFloat(variables[match] || 0);
+//             return value < 0 ? '(' + value + ')' : value;
+//         });
+
+//         // Evaluate the substituted formula using math.js
+//         let result = math.evaluate(substitutedFormula);
+
+//         // Ensure that the result is a valid number
+//         result = !isFinite(result) ? 0 : parseFloat(result);
+
+//         // Format the result to two decimal places
+//         return result.toFixed(2);
+//     } catch (error) {
+//         console.error('Error in parseFormula:', error);
+//         return null; // Handle the error gracefully
+//     }
+// }
+
+function processVirtualFormula(formula, variables) {
+    // Replace null values with 0
+    Object.keys(variables).forEach(key => {
+        if (variables[key] === null) {
+            variables[key] = '0';
+        }
+    });
+
+    // Escape special characters in variable names for the regular expression
+    const escapeRegExp = (string) => {
+        return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    };
+
+    try {
+        // Create a regular expression pattern to match variable names in the formula
+        const variablePattern = new RegExp(Object.keys(variables).map(key => `${escapeRegExp(key)}`).join('|'), 'g');
+
+        // Replace variable names with their corresponding values
+        const substitutedFormula = formula.replace(variablePattern, match => {
+            // Handle negative values properly
+            const value = parseFloat(variables[match] || 0);
+            return value;
+        });
+
+        console.log('Substituted Formula:', substitutedFormula); // Debugging
+
+        // Replace any remaining instances of special characters or unexpected input
+        const sanitizedFormula = substitutedFormula
+            .replace(/[^0-9+\-*/().]/g, ''); // Allow only numbers, operators, and parentheses
+
+        // Compute the result using a safer evaluation
+        let result = eval(sanitizedFormula);
+
+        // Ensure that the result is a valid number
+        result = !isFinite(result) ? 0 : parseFloat(result);
+
+        // Format the result to two decimal places
+        return result.toFixed(2);
+    } catch (error) {
+        console.error('Error in parseFormula:', error);
+        return null; // Handle the error gracefully
+    }
+}
+
+
 module.exports.calculatorCalculations = async (formulas, tonsdata,flow_Values) => {
     try {
      
@@ -123,9 +207,7 @@ module.exports.calculatorCalculations = async (formulas, tonsdata,flow_Values) =
         shiftstats.push({'availability': parseFloat(flow_Values.availability)})
         shiftstats.push({'utilisation': parseFloat(flow_Values.maxUtilization)})
 
-   
-        
-    
+
 
         // Return the calculated stats if needed
         return  {shiftstats ,mtdstat};
@@ -136,6 +218,40 @@ module.exports.calculatorCalculations = async (formulas, tonsdata,flow_Values) =
 };
 
 
+
+
+module.exports.virtualCalculations = async (tonsdata, formulas) => {
+    try {
+        let tonsformulas = formulas;
+        let mtd = tonsdata;
+        let mtdstat = [];
+
+        // Create a map of variables from the tonsdata
+        let variablesmtd = Object.fromEntries(mtd.map(entry => [entry.key, entry.month_to_date ?? 0]));
+
+        if (tonsformulas.length !== 0) {
+            mtdstat = tonsformulas.map(formulaObject => {
+                const [key, formula] = Object.entries(formulaObject)[0];
+                // Process formula to handle variables and '#' character
+                const substitutedFormula = processVirtualFormula(formula, variablesmtd);
+                return { 'key': key, 'month_to_date': substitutedFormula };
+            });
+        }
+
+        // Ensure mtdstat is merged with mtd if mtdstat is not empty
+        if (mtdstat.length > 0) {
+            mtd = [...mtd, ...mtdstat];
+        }
+
+ 
+
+        // Return the calculated stats (now with correct Promise resolution)
+        return Promise.resolve(mtd);
+    } catch (error) {
+        console.error('Error in virtualCalculations:', error);
+        return Promise.reject(new Error('Calculation failed'));
+    }
+};
 
 
 

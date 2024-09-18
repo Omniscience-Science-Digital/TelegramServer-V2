@@ -3,12 +3,17 @@ const { generateAndSaveLineChart } = require('../helpers/charts/chart_helper');
 const {groupByTimeIntervals} = require('../resources/report.resource')
 
 const {calculateTimeIntervals}= require('./time.utility')
-const {calculateDataPoints,parseFormulas}=require('./formulas.utility')
+const {calculateDataPoints,parseFormulas,virtualCalculations}=require('./formulas.utility')
+
 
 async function handleShiftons(myflowBuffer, shift, startTime, endTime, startdate, enddate, scales, monthstart, primaryScalesArray, mtd_target, scaleType, canvas,virtualDatapoints,maxUtilization) {
     try {
 
         let mtdsStarttime = (shift === 'day') ? startTime : endTime;
+
+                
+        //handle virtual datapoints
+        let virtualformulas = parseFormulas(virtualDatapoints)
 
    
         //calculate mtd achieved
@@ -27,9 +32,10 @@ async function handleShiftons(myflowBuffer, shift, startTime, endTime, startdate
             };
 
 
-
+  
 
             if (data.openingScaletons !== '') {
+             
                 const mtdTonns = await monthToDatewithOpeningsToDate(endTime, enddate, data.iccid, data.openingScaletons)
 
                 if (mtdTonns[0]) {
@@ -45,8 +51,10 @@ async function handleShiftons(myflowBuffer, shift, startTime, endTime, startdate
 
                 
             } else {
+              
                 const mtdTonns = await monthToDate(mtdsStarttime, endTime, monthstart, enddate, data.iccid)
                 if (mtdTonns[0]) {
+                  
                     mtdsObject.push({ key: data.scaleName, month_to_date: mtdTonns[0].month_to_date });
                     if (primaryScalesArray.includes(data.scaleName)) {
                         mtd_achieved += parseFloat(mtdTonns[0].month_to_date)
@@ -65,7 +73,8 @@ async function handleShiftons(myflowBuffer, shift, startTime, endTime, startdate
         }
         
   
-   
+        mtdsObject =await virtualCalculations(mtdsObject,virtualformulas)
+
         //handle total sshift tons
         let total_shifttons = [];
 
@@ -137,7 +146,7 @@ async function handleShiftons(myflowBuffer, shift, startTime, endTime, startdate
         var site_had_production =(parseFloat(dailytons) >parseFloat(maxUtilization))?true:false;
 
         
-        // // Use Promise.all for parallel processing
+        //Use Promise.all for parallel processing
         let shiftonsGraphPromises = scales.map(async (scale) => {
             // Check if the required properties exist
             if (!scale.scaleName || !scale.scaleName.S || !scale.iccid || !scale.iccid.S) {
@@ -170,13 +179,10 @@ async function handleShiftons(myflowBuffer, shift, startTime, endTime, startdate
             console.error('Error generating and saving line chart:', error);
         });
 
-        
-        //handle virtual datapoints
-        let virtualformulas = parseFormulas(virtualDatapoints)
+
     
-
+        
         total_shifttons =virtualformulas.length > 0? calculateDataPoints(virtualformulas,total_shifttons):total_shifttons;
-
 
 
          total_shifttons = total_shifttons.map(shiftton => {

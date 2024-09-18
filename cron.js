@@ -7,22 +7,9 @@ const cron = require('node-cron');
 const timeZone = 'Africa/Johannesburg';
 
 
-//testing script
+//type script
 
 let runprod_test ="Prod";
-// let runprod_test ="test";
-
-(async () => {
-    try {
-            // This cron job triggers every day at 6 PM SAST
-    // const items = await scanDynamoDBTableNight('06:30');
-    // await report_controller.reportdata(items, "night", runprod_test);
-
-
-    } catch (error) {
-        console.error('Error:', error);
-    }
-})();
 
 
 /**Day Cron Jobs **/

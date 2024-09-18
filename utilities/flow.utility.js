@@ -4,7 +4,6 @@ const { generateAndSaveLineChart } = require('../helpers/charts/chart_helper');
 module.exports.flowutility = async (startTime, endTime, startdate, enddate, scales, canvas) => {
 
 
-
     // // Use Promise.all for parallel processing
     const reportPromises = scales.map(async (scale) => {
         // Check if the required properties exist
@@ -57,9 +56,7 @@ module.exports.flowutility = async (startTime, endTime, startdate, enddate, scal
 }
 
 
-
 module.exports.flowObjectValues = async (startTime, endTime, startdate, enddate,runningtph, scales) => {
-
 
 
     // // Use Promise.all for parallel processing
@@ -104,6 +101,7 @@ module.exports.flowObjectValues = async (startTime, endTime, startdate, enddate,
 
 }
 
+
 module.exports.flowDataPLC = async(startTime, endTime,startdate,enddate, plcflowArray, canvas,plcIccid)=>{
 
     
@@ -118,6 +116,8 @@ module.exports.flowDataPLC = async(startTime, endTime,startdate,enddate, plcflow
         
         let myflowData=await getPlcFlowValues(startTime, endTime, startdate, enddate,title, plcIccid);
 
+        
+
     
         return { key, data: myflowData };  // Use key instead of iccid
     } catch (error) {
@@ -130,7 +130,8 @@ module.exports.flowDataPLC = async(startTime, endTime,startdate,enddate, plcflow
     // Wait for all promises to resolve
     var flowDataArray = await Promise.all(reportPromises);
 
-   
+
+      
     var flowImage = await generateAndSaveLineChart("flow",flowDataArray,canvas,startTime,endTime)
 
     
@@ -139,6 +140,7 @@ module.exports.flowDataPLC = async(startTime, endTime,startdate,enddate, plcflow
     return flowImage;
     
 }
+
 
 module.exports.flowObjectDataPLC = async (startTime, endTime, startdate, enddate, plcflowArray, runningtph,plcIccid) => {
 
@@ -151,8 +153,11 @@ module.exports.flowObjectDataPLC = async (startTime, endTime, startdate, enddate
     
 
         try {
+
+        
+
             // Assuming runtimePlcFlow is a defined function that returns flow data
-            let myflowData = await runtimePlcAllscalesFlow(startTime, endTime, startdate, enddate,plcIccid, title, runningtph);
+          let myflowData = await runtimePlcAllscalesFlow(startTime, endTime, startdate, enddate,plcIccid, title, runningtph);
             return { key, flowData: myflowData[0] };  // Use key instead of iccid
         } catch (error) {
             // Log or handle individual errors

@@ -2,7 +2,7 @@ const { averageFlowWithIccid, runtimeFlowIccid,runtimeAccumulatingFlow, ActualSt
 const { calculateTotalHours, addTwoHours } = require("./time.utility");
 
 
-async function parallelcaleCalcsFunc(shift, shifts_Ran, startTime, endTime, flowtitle, flowiccid, startdate, enddate, runningtph, maxUtilization, scales, primaryScalesArray) {
+async function parallelcaleCalcsFunc(shift, startTime, endTime, flowtitle, flowiccid, startdate, enddate, runningtph, maxUtilization, scales, primaryScalesArray) {
     try {
         // Get flow values
         let flowvalues = await averageFlowWithIccid(startTime, endTime, startdate, enddate, flowtitle, flowiccid, runningtph);
