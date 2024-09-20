@@ -12,17 +12,17 @@ const timeZone = 'Africa/Johannesburg';
 
 let runprod_test ="test";
 
-(async () => {
-    try {
+// (async () => {
+//     try {
     
-        // const items = await scanDynamoDBTableDay('22:00');
-        // await report_controller.reportdata(items, "day", runprod_test);
+//         const items = await scanDynamoDBTableDay('22:00');
+//         await report_controller.reportdata(items, "day", runprod_test);
      
 
-    } catch (error) {
-        console.error('Error:', error);
-    }
-})();
+//     } catch (error) {
+//         console.error('Error:', error);
+//     }
+// })();
 
 
 
@@ -54,7 +54,7 @@ cron.schedule('00 20 * * *', async () => {
 
 cron.schedule('0 8 * * *', async () => {
     // This cron job triggers every day at 6 AM SAST
-    const items = await scanDynamoDBTableNight('20:00');
+    const items = await scanDynamoDBTableNight('08:00');
     await report_controller.reportdata(items, "night", runprod_test);
 
 
