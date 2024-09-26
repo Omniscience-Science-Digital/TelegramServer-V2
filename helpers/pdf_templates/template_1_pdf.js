@@ -1,7 +1,7 @@
 const PDFDocument = require("pdfkit");
 const fs = require("fs");
 const blobStream = require('blob-stream');
-const { generateHeader, drawRectangleWithNoText } = require('../pdf_Components/pdf_header');
+const { generateHeader, drawRectangleWithNoText,generatePlantName } = require('../pdf_Components/pdf_header');
 const { generateFooter } = require('../pdf_Components/pdf_footer');
 const { drawRectangleWithText, createDefinitionsTable, drawHeaderRectangles, table, mtdtable, flowtable, createSTatisticsTable, noProduction } = require('../pdf_Components/pdf_tables')
 const { dataDefinitions } = require('../../resources/data.resource');
@@ -13,7 +13,7 @@ let customerInformationTop;
 
 
 
-async function PDFTableGenerator(pdfdata, sitename, filePath, reportHeaderRenames, fullday, options = { margin: 5 }) {
+async function PDFTableGenerator(pdfdata, sitename, filePath, reportHeaderRenames, options = { margin: 5 }) {
 
   const pageOptions = { size: [595.28, 841.89], margin: options.margin }; // A4 size: 595.28x841.89 points
 
@@ -45,7 +45,7 @@ async function PDFTableGenerator(pdfdata, sitename, filePath, reportHeaderRename
 
 
     drawRectangleWithNoText(doc, 92);
-    generatePlantName(doc, sitename + "  Plant");
+    generatePlantName(doc, sitename + "  Plant",customerInformationTop);
 
 
     //draw , header rectangles
@@ -104,7 +104,6 @@ async function PDFTableGenerator(pdfdata, sitename, filePath, reportHeaderRename
 
 
     drawRectangleWithText(doc, 'SHIFT FLOW STATISTICS', customerInformationTop = 235);
-
     await flowtable(doc, pdfdata.myflowObject, 258, 20);
 
     //shift tons graph
@@ -117,10 +116,6 @@ async function PDFTableGenerator(pdfdata, sitename, filePath, reportHeaderRename
     //    // Draw  Shiftons table
     await table(doc, pdfdata.total_shifttons, 543, 20);
 
-        //mtd table
-        // await mtdtable(doc, pdfdata.mtdsTons, 625, 20);
-
-        // console.log(pdfdata.total_shifttons)
 
     // See the range of buffered pages
     const range = doc.bufferedPageRange(); // => { start: 0, count: 2 }
@@ -159,30 +154,6 @@ async function PDFTableGenerator(pdfdata, sitename, filePath, reportHeaderRename
   });
 
 
-}
-
-
-function generatePlantName(doc, plantName) {
-  const len = plantName.length;
-  const pageWidth = 595.28;
-  const textSpacer = 5;
-  const lightGrayHeight = 15; // Adjust the height as needed
-  const grayShade = '#f2f2f2'; // Use a valid color value
-
-  // Draw the light gray rectangle
-  doc.fillColor(grayShade).rect(20, customerInformationTop, pageWidth - 40, lightGrayHeight).fill();
-
-  // Draw the plant name
-  doc
-    .font('Times-Bold')
-    .fontSize(9)
-    .fillColor('black')
-    .text(plantName.toUpperCase(), len / 2, customerInformationTop + textSpacer, {
-      width: pageWidth - 2 * textSpacer - 40, // Adjust for padding
-      align: 'center',
-      underline: true,
-    })
-    .moveDown(); // Move down for spacing
 }
 
 

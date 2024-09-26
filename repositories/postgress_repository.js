@@ -48,6 +48,7 @@ const shiftTons = async (startTime, endTime, startdate, enddate, iccid, modbus_k
               FROM
               public.devicelogs_production_${iccid}
               WHERE
+              (status='OK') AND
               ${modbus_key}
               AND date BETWEEN '${startdate} ${startTime}' AND '${enddate} ${endTime}'
               )
@@ -60,8 +61,7 @@ const shiftTons = async (startTime, endTime, startdate, enddate, iccid, modbus_k
           `;
 
     }
-
-
+    
     const result = await db.query(query);
 
 
@@ -156,7 +156,7 @@ const startingHourtons = async (startTime, endTime, startdate, enddate, iccid, m
       FROM
       public.devicelogs_production_${iccid}
       WHERE
-      
+      (status='OK') AND
       ${modbus_key}
       AND date BETWEEN '${startdate} ${startTime}' AND '${enddate} ${endTime}'
   ),
@@ -180,7 +180,7 @@ const startingHourtons = async (startTime, endTime, startdate, enddate, iccid, m
       FROM
       public.devicelogs_production_${iccid}
       WHERE
-      
+      (status='OK') AND
       ${modbus_key}
       AND date BETWEEN '${startdate} ${startTime}' AND '${enddate} ${endTime}'
       ORDER BY
@@ -483,9 +483,7 @@ exports.getFlowValues = async (startTime, endTime, startdate, enddate, iccid) =>
       
       `;
 
-
     const result = await db.query(query);
-
 
     // Extract the "flowdata" value from the rows
     const flowdata = result.rows;

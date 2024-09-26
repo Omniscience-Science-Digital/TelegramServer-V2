@@ -61,3 +61,95 @@ module.exports.dataDefinitions = [
       },
     ]
   ];
+
+  module.exports.datastatusDefinitionsLeft = [
+    [
+      {
+        text: 'Count of Modbus devices OFF:',
+        width: 0.7,
+      },
+      {
+        text: ' ',
+        width: 0.3,
+      },
+    ],
+    [
+      {
+        text: 'Count of Modbus devices not updating:',
+        width: 0.7,
+      },
+      {
+        text: ' ',
+        width: 0.3,
+      },
+    ],
+
+    [
+      {
+        text: 'Count of Modbus devices with battery in critical state :',
+        width: 0.7,
+      },
+      {
+        text: ' ',
+        width: 0.3,
+      },
+    ],
+    [
+      {
+        text: 'Count of Modbus devices  with decreasing totalization:',
+        width: 0.7,
+      },
+      {
+        text: ' ',
+        width: 0.3,
+      },
+    ],
+
+  ];
+  
+
+  module.exports.datastatusDefinitionsRight = [
+    [
+      {
+        text: 'Count of Modbus devices where month tons reset:',
+        width: 0.7,
+      },
+      {
+        text: ' 87',
+        width: 0.3,
+      },
+    ],
+    [
+      {
+        text: 'Count of Modbus devices with update > 15 minutes:',
+        width: 0.7,
+      },
+      {
+        text: ' 76',
+        width: 0.3,
+      },
+    ],
+
+    [
+      {
+        text: 'Count of Modbus devices where totalizer > 750,000:',
+        width: 0.7,
+      },
+      {
+        text: ' 121',
+        width: 0.3,
+      },
+    ],
+    [
+      {
+        text: 'Count of Modbus devices where shift tons reset more than 3 minutes after shift change:',
+        width: 0.7,
+      },
+      {
+        text: ' 90',
+        width: 0.3,
+      },
+    ],
+
+  ];
+

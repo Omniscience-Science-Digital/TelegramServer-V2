@@ -12,7 +12,7 @@ exports.reportdata = async (sites, shift, flag) => {
 
     let reportDataArray;
 
-    let item, startTime, sitestatus, dayStart, primaryScalesArray, endTime, sitename, runningtph, maxUtilization, chatId, totalMonthTarget, scaleType, flowtitle, flowiccid, plcIccid, scales, reportTo, email;
+    let item, startTime,  dayStart, primaryScalesArray, endTime, sitename, runningtph, maxUtilization, chatId, totalMonthTarget, scaleType, flowtitle, flowiccid, plcIccid, scales, reportTo, email;
 
     let items = sites;
 
@@ -20,12 +20,7 @@ exports.reportdata = async (sites, shift, flag) => {
     for (let index = 0; index < items.length; index++) {
         item = sites[index];
 
-        sitestatus = item.sitestatus.BOOL;
         sitename = item.sitename?.S || '';
-
-        // Don't run if not allowed
-        if (!sitestatus) continue;
-
 
         // if (sitename !== 'Blou - Test') continue;
 

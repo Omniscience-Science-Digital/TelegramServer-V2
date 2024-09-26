@@ -3,6 +3,45 @@ const { ScanCommand, client, reporttable, scalestable } = require("../configs/dy
 
 
 
+module.exports.scanDynamoDBAllRows = async function () {
+
+  
+  try {
+    const [reports,scales] = await Promise.all([
+      scanDynamoDBTable(),
+      getScales()
+    ]);
+
+
+
+
+    const scalesMap = scales.reduce((acc, scale) => {
+      if (!acc[scale.telegramreportID.S]) {
+        acc[scale.telegramreportID.S] = [];
+      }
+      acc[scale.telegramreportID.S].push(scale);
+      return acc;
+    }, {});
+
+    const linkedReports = reports.map(report => {
+      const reportId = report.id.S;
+    
+
+
+      if (scalesMap[reportId]) {
+        report.Telegramscales = scalesMap[reportId];
+      }
+
+      return report;
+    });
+
+
+
+    return linkedReports;
+  } catch (error) {
+    console.error('Error fetching or linking data:', error);
+  }
+}
 
 
 module.exports.scanDynamoDBTableNight = async function (nightStop) {
@@ -192,6 +231,31 @@ const scanDynamoDBTableWithExtraTime = async (extraShiftStop) => {
       ExpressionAttributeNames: {
         '#extraShiftStop': 'extraShiftStop'
       },
+      ExpressionAttributeValues: expressionAttributeValues
+    };
+
+    const data = await client.send(new ScanCommand(params));
+    // console.log('Scan DynamoDB Result:', data.Items); // Log scan result for debugging
+
+    return data.Items;
+  } catch (err) {
+    console.error('Error scanning DynamoDB table:', err);
+    throw err;
+  }
+};
+
+
+const scanDynamoDBTable = async () => {
+  try {
+    const filterExpression = 'sitestatus = :status';
+
+    const expressionAttributeValues = {
+      ':status': { BOOL: true }
+    };
+
+    const params = {
+      TableName: reporttable,
+      FilterExpression: filterExpression,
       ExpressionAttributeValues: expressionAttributeValues
     };
 

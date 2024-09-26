@@ -13,10 +13,10 @@ module.exports.drawRectangleWithText = (doc, text, posY) => {
   const darkGrayHeight = 2;   // Adjust the height of the dark gray rectangle on top
 
   // Draw the light gray rectangle
-  doc.fillColor(grayShade).rect(20, posY, pageWidth - 40, lightGrayHeight).fill();
+  doc.fillColor(grayShade).rect(16, posY, pageWidth - 55, lightGrayHeight).fill();
 
   // Draw a smaller dark gray rectangle on top
-  doc.fillColor(darkGrayShade).rect(20, posY, pageWidth - 40, darkGrayHeight).fill();
+  doc.fillColor(darkGrayShade).rect(16, posY, pageWidth - 55, darkGrayHeight).fill();
 
   // Draw the text inside the light gray rectangle
   doc
@@ -71,6 +71,69 @@ module.exports.createDefinitionsTable = (doc, rows, posY, posX) => {
   doc.moveDown(2);
   doc.text('', doc.page.margins.left);
 }
+
+
+module.exports.createDefinitionsStatusTable = (doc, rows, posY, posX) => {
+  doc.font("Times-Roman").fontSize(7);
+
+  const pageWidth = 395;
+  const textSpacer = 5;
+
+  const grayShade = '#f2f2f2'; // Light gray color
+
+  let y = posY;
+  let x = posX;
+
+  rows.forEach(row => {
+    const arr = row.map(column => doc.heightOfString(column.text, { width: column.width * pageWidth }));
+    const cellHeight = Math.max(...arr) + textSpacer * 2;
+
+    // Add the background shade for the first column
+  
+     doc.fillColor(grayShade).rect(x, y, row[0].width * pageWidth + textSpacer, cellHeight).fill();
+      
+
+
+
+  // Add the background shade for the second column
+  doc.fillColor('#FF8343').rect(x+5.5 + row[0].width * pageWidth, y, row[1].width * pageWidth-5, cellHeight).fill();
+
+
+  
+
+    doc.lineWidth(0.3).strokeColor('lightgrey');
+    doc.lineJoin('miter').rect(x, y, pageWidth, cellHeight).stroke();
+
+    let writerPos = x;
+    for (let i = 0; i < row.length - 1; i++) {
+      writerPos += row[i].width * pageWidth;
+
+      doc.lineCap('butt').moveTo(writerPos + textSpacer, y).lineTo(writerPos + textSpacer, y + cellHeight).stroke();
+    }
+
+
+    let textWriterPos = x + textSpacer;
+    for (let i = 0; i < row.length; i++) {
+      // Conditionally set alignment to 'center' only for the second column (i === 1)
+      const alignment = i === 1 ? 'center' : 'left';
+      
+      doc.fillColor('black').text(row[i].text, textWriterPos, y + textSpacer, {
+        continued: false,
+        width: row[i].width * pageWidth - (textSpacer + 5),
+        align: alignment
+      });
+    
+      textWriterPos += row[i].width * pageWidth + (textSpacer - 5);
+    }
+    
+
+    y += cellHeight;
+  });
+
+  doc.moveDown(2);
+  doc.text('', doc.page.margins.left);
+}
+
 
 
 module.exports.drawHeaderRectangles = (doc, reportHeaderRenames, reportDataArray, point) => {

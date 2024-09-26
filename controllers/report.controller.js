@@ -21,7 +21,7 @@ exports.runReportdata = async (req, res) => {
 
 
 
-    let item, startTime, reportTo, email, sitestatus, dayStart, primaryScalesArray, endTime, sitename, runningtph, maxUtilization, totalMonthTarget, startDay, scaleType, flowtitle, flowiccid, plcIccid, scales;
+    let item, startTime, reportTo, email,  dayStart, primaryScalesArray, endTime, sitename, runningtph, maxUtilization, totalMonthTarget, startDay, scaleType, flowtitle, flowiccid, plcIccid, scales;
 
 
     let items = report;
@@ -34,14 +34,10 @@ exports.runReportdata = async (req, res) => {
         for (let index = 0; index < items.length; index++) {
             item = sites[index];
 
-            sitestatus = item.sitestatus.BOOL
+ 
             sitename = item.sitename?.S || '';
 
-            //don't run if not allowed
-            if (!sitestatus) continue;
-
             if (!shift) continue;
-
 
 
             console.log(sitename + ' : ')

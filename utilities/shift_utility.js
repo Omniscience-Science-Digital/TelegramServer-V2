@@ -11,6 +11,13 @@ const {samePlantCalc_ProcessScales,clearHashKeys}= require('../helpers/scalesCal
 
 
 
+
+//internal report status
+
+const { internalreportStatusCalcsFunc } = require('./reportstatus.utility.js')
+
+
+
 module.exports.singleScale = async (startTime, endTime, scales, monthstart, shift, primaryScalesArray, runningtph, maxUtilization, mtd_target, scaleType, canvas, formulas, virtualDatapoints) => {
     try {
 
@@ -316,5 +323,39 @@ module.exports.plcParallelScale = async (startTime, endTime, scales,plcIccid,plc
         console.log(`Error processing  parallel scale in shift utility: ${error} `)
         throw error; // Optionally rethrow to propagate the error further
     }
+
+}
+
+
+
+module.exports.reportStatusUtility =async (startTime, endTime,triggerStart,triggerEnd, scales,  shift)=>
+{
+      //pass correct dt  time
+      var postgress_start = subtractTwoHours(startTime);
+      var postgress_end = subtractTwoHours(endTime);
+
+    
+      //trigger postgress start
+
+      var triggerpostgress_start = subtractTwoHours(triggerStart);
+      var triggerpostgress_end = subtractTwoHours(triggerEnd);
+
+ 
+      //get start and  end data 
+
+      let startdate = (shift === 'day') ? getCurrentDateFormatted() : getPreviousDateFormatted();
+      let enddate = getCurrentDateFormatted();
+
+
+     let statusData = await internalreportStatusCalcsFunc( triggerpostgress_start,triggerpostgress_end,postgress_start, postgress_end, startdate, enddate,   scales);
+
+
+  
+    // Convert it into an array of rows (in this case, 1 row):
+    statusData = [statusData];  
+
+
+      
+    return statusData;
 
 }
