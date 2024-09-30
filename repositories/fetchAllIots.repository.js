@@ -35,52 +35,37 @@ exports.listTables = async () => {
 
 exports.getMessages = async (tableName) => {
   try {
+    
 
-  const query = `
-    SELECT
+    const query = `
+    WITH ValueData AS (
+    SELECT 
         iccid,
-        MIN(date) AS First_date,
-        MAX(date) AS Last_date,
-        SUM(CAST(value AS numeric)) AS Total_Billablepoints
-    FROM (
-        SELECT DISTINCT ON (date_trunc('hour', date), EXTRACT(HOUR FROM date))
-            iccid,
-            value,
-            date,
-            title
-        FROM
-            public.${tableName}
-        WHERE
-            title = 'TS Billiable Message Count'
-            AND date >= TIMESTAMP '2024-09-01 22:00:00' 
-            AND date < CURRENT_DATE + INTERVAL '22:00' -- Up to today at 22:00
-            AND EXTRACT(HOUR FROM date) IN (0, 6, 12, 18)
-        ORDER BY
-            date_trunc('hour', date), EXTRACT(HOUR FROM date), date ASC
-    ) AS distinct_data
-    GROUP BY
-        iccid;
+        value::numeric AS numeric_value,  -- Convert value to numeric
+        date,
+        FIRST_VALUE(value::numeric) OVER (ORDER BY date ASC) AS first_value,  -- First value
+        LAST_VALUE(value::numeric) OVER (ORDER BY date ASC ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS last_value,  -- Last value across the full result set
+        MAX(value::numeric) OVER () AS max_value  -- Maximum value in the entire result set
+    FROM 
+        public.${tableName}
+    WHERE 
+        datasourcekey = 'calculated.ts-billable-message-count' 
+        AND date >= date_trunc('month', CURRENT_DATE)  -- Beginning of the current month
+        AND date < date_trunc('month', CURRENT_DATE) + INTERVAL '1 month'  -- Up to the end of the current month
+        AND date < CURRENT_DATE + INTERVAL '1 day'  -- Up to the current day + 1 day
+)
+SELECT 
+    iccid,
+    MIN(date) AS First_date,  -- Earliest date
+    MAX(date) AS Last_date,    -- Latest date
+    (MAX(max_value) + MAX(last_value) - MAX(first_value)) AS Total_Billablepoints  -- Calculate billapoints
+FROM 
+    ValueData
+GROUP BY iccid
+LIMIT 1;
+
+
 `;
-
-
-    // const query = `
-    // SELECT DISTINCT ON (date_trunc('hour', date), EXTRACT(HOUR FROM date))
-    // iccid,
-    // date,
-    // title,
-    // value
-    // FROM
-    // public.${tableName}
-    // WHERE
-    // title = 'TS Billiable Message Count' AND
-    // date >= DATE '2024-09-1' + INTERVAL '06:00'
-    // AND date < CURRENT_DATE + INTERVAL '1 day'
-    // AND EXTRACT(HOUR FROM date) IN (6, 0, 12, 18)
-    // ORDER BY
-    // date_trunc('hour', date), EXTRACT(HOUR FROM date), date ASC;
-    // `;
-
-
 
 
     const result = await db.query(query);

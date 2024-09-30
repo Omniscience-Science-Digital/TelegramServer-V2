@@ -69,7 +69,7 @@ async function PDFInternalStatusreportGenerator(headerTitle, siteData, options =
     // See the range of buffered pages
     const range = doc.bufferedPageRange(); // => { start: 0, count: 2 }
 
-    doc.pipe(fs.createWriteStream('./z/' + 'Statusreport_00:00 - 12:00 Tues 13 Sept 2024.pdf'));
+   // doc.pipe(fs.createWriteStream('./z/' + 'Statusreport_00:00 - 12:00 Tues 13 Sept 2024.pdf'));
 
     // Manually flush pages that have been buffered
     doc.flushPages();
@@ -223,11 +223,7 @@ function drawTable(doc, headers, sites) {
   });
 
 
-
-
-
 }
-
 
 
 

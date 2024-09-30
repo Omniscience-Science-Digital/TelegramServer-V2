@@ -1,6 +1,7 @@
 const { scanDynamoDBTableDay, scanDynamoDBTableNight, scanDynamoDBTableExtraShift } = require('./repositories/dynamodb_repository');
 const report_controller = require('./controllers/cron.controller');
 const intternalStatus_controller = require('./controllers/internalStatusreport.controller');
+const Statusreportcontroller = require('./controllers/internalStatusreport.controller');
 
 const cron = require('node-cron');
 
@@ -13,19 +14,41 @@ const timeZone = 'Africa/Johannesburg';
 
 let runprod_test ="test";
 
-// (async () => {
-//     try {
+(async () => {
+    try {
     
-//         const items = await scanDynamoDBTableDay('22:00');
-//         await intternalStatus_controller.Statusreportcontroller( "day", runprod_test);
+        // const items = await scanDynamoDBTableDay('22:00');
+        // await intternalStatus_controller.Statusreportcontroller( "day", runprod_test);
+
+        // let triggerStart ="00:00",triggerEnd= "12:00",shift='night';
+        
+        // await Statusreportcontroller.Statusreportcontroller(triggerStart,triggerEnd,shift);
      
 
-//     } catch (error) {
-//         console.error('Error:', error);
-//     }
-// })();
+    } catch (error) {
+        console.error('Error:', error);
+    }
+})();
+
+//Hardekool morning 
+
+cron.schedule('0 6 * * *', async () => {
+    // This cron job triggers every day at 6 AM SAST
+    const items = await scanDynamoDBTableNight('06:00');
+    await report_controller.reportdata(items, "night", runprod_test);
 
 
+}, { timezone: timeZone });
+
+//Hardekool evenng
+cron.schedule('0 18 * * *', async () => {
+    // This cron job triggers every day at 6 PM SAST
+
+    const items = await scanDynamoDBTableDay('18:00');
+    await report_controller.reportdata(items, "day", runprod_test);
+
+
+}, { timezone: timeZone });
 
 //testing kleinsee
 cron.schedule('0 23 * * *', async () => {
@@ -61,3 +84,25 @@ cron.schedule('0 8 * * *', async () => {
 
 }, { timezone: timeZone });
 
+
+
+// midninght status report
+
+//internal status report
+cron.schedule('0 0 * * *', async () => {
+    
+    let triggerStart ="12:00",triggerEnd= "00:00",shift='day';
+    await Statusreportcontroller.Statusreportcontroller(triggerStart,triggerEnd,shift);
+
+}, { timezone: timeZone });
+
+
+//noon  status report
+
+//internal status report
+cron.schedule('0 12 * * *', async () => {
+    
+    let triggerStart ="00:00",triggerEnd= "12:00",shift='night';
+    await Statusreportcontroller.Statusreportcontroller(triggerStart,triggerEnd,shift);
+
+}, { timezone: timeZone });

@@ -22,22 +22,34 @@ exports.listTables = async () => {
 exports.BillableMessages = async () => {
   try {
     // Retrieve hourlyShifttons
-    const { table_name, count } = await tableRepository.listTables();
+    const { table_name } = await tableRepository.listTables();
 
    
     // Ensure table_name is an array and handle it properly
     if (!Array.isArray(table_name)) {
       throw new Error('Expected table_name to be an array');
     }
+       //messages now 
+       let count =0;
+       let messages = [];
 
-    // Use Promise.all to handle all promises concurrently
-    const tablePromises = table_name.map(async (table_name) => {
-      const query = await tableRepository.getMessages(table_name);
-      return { key: table_name, value: query };
-    });
+        // Using a for...of loop
+        for (const table of table_name) {
+          const tableName = table;
+        
+          var query = await tableRepository.getMessages(tableName)
+  
+          
+          messages.push({ key: tableName, value: query });
+  
+          count+=1;
+  
+          console.log('Table Number  '+ count);
+  
+        
+  
+      }
 
-    // Wait for all promises to resolve
-    const messages = await Promise.all(tablePromises);
 
     // Return the resolved messages array
     return messages;

@@ -1,7 +1,8 @@
-const fs = require('fs');
 const ExcelJS = require('exceljs');
 const reportService = require('../services/fetchAllIots.service');
 const { successResponse, failResponse } = require('../utils/response.util');
+const { getCurrentDateFormatted } = require('../utilities/time.utility');
+const handleTelegramNotification = require('../helpers/telegram/telegram.helper')
 
 
 /**
@@ -21,18 +22,17 @@ exports.getBillableData = async (req, res) => {
     let data = []; // Initialize data as an empty array
 
     const firstObject = get_tablenames;
+    const chartIDTest = '-4019893816';
 
     firstObject.forEach(entry => {
       console.log(`Data for key '${entry.key}':`);
 
       // Check if the 'value' array is not empty
-      if (Array.isArray(entry.value) && entry.value.length > 0) {
+      if (Array.isArray(entry.value)) {
         entry.value.forEach((object, index) => {
           data.push(object);
         });
-      } else {
-        console.log('  No data available.');
-      }
+      } 
     });
 
 
@@ -51,6 +51,8 @@ exports.getBillableData = async (req, res) => {
       pageSetup:{paperSize: 9, orientation:'landscape'}
     });
 
+  
+
     // Add data to the worksheet
     excelData.forEach(row => {
       worksheet.addRow(row);
@@ -60,6 +62,16 @@ exports.getBillableData = async (req, res) => {
     const filePath = 'output_billable_data.xlsx';
     await workbook.xlsx.writeFile(filePath);
 
+      // Write workbook to a buffer
+      let excelbuffer = await workbook.xlsx.writeBuffer();
+
+
+     var current_date =`${getCurrentDateFormatted()}, billable_data.xlsx`;
+
+  
+    await handleTelegramNotification('-4019893816', excelbuffer, current_date);
+  
+        
     console.log('Excel file has been written');
     return res.send(successResponse('Success'));
   } catch (err) {

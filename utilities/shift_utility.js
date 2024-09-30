@@ -347,7 +347,7 @@ module.exports.reportStatusUtility =async (startTime, endTime,triggerStart,trigg
       let enddate = getCurrentDateFormatted();
 
 
-     let statusData = await internalreportStatusCalcsFunc( triggerpostgress_start,triggerpostgress_end,postgress_start, postgress_end, startdate, enddate,   scales);
+     let statusData = await internalreportStatusCalcsFunc( triggerpostgress_start,triggerpostgress_end,postgress_start, postgress_end, startdate, enddate,null  , scales);
 
 
   
@@ -359,3 +359,40 @@ module.exports.reportStatusUtility =async (startTime, endTime,triggerStart,trigg
     return statusData;
 
 }
+
+
+
+
+
+module.exports.reportStatusUtilityPlc =async (startTime, endTime,triggerStart,triggerEnd, scales,plcIccid,  shift)=>
+    {
+          //pass correct dt  time
+          var postgress_start = subtractTwoHours(startTime);
+          var postgress_end = subtractTwoHours(endTime);
+    
+        
+          //trigger postgress start
+    
+          var triggerpostgress_start = subtractTwoHours(triggerStart);
+          var triggerpostgress_end = subtractTwoHours(triggerEnd);
+    
+     
+          //get start and  end data 
+    
+          let startdate = (shift === 'day') ? getCurrentDateFormatted() : getPreviousDateFormatted();
+          let enddate = getCurrentDateFormatted();
+    
+    
+
+        let statusData = await internalreportStatusCalcsFunc( triggerpostgress_start,triggerpostgress_end,postgress_start, postgress_end, startdate, enddate,plcIccid,  scales);
+    
+    
+      
+        // Convert it into an array of rows (in this case, 1 row):
+       statusData = [statusData];  
+    
+    
+          
+        return statusData;
+    
+    }

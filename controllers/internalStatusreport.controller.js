@@ -1,28 +1,40 @@
 const { performance } = require('perf_hooks');
 const PDFInternalStatusreportGenerator = require('../helpers/pdf_templates/internalStatus_template');
 const { getCurrentDateFormatted } = require('../utilities/time.utility');
-const { reportStatusUtility } = require("../utilities/shift_utility");
+const { reportStatusUtility, reportStatusUtilityPlc } = require("../utilities/shift_utility");
 const { scanDynamoDBAllRows } = require('../repositories/dynamodb_repository');
 
-//get first row data 
+const handleTelegramNotification = require('../helpers/telegram/telegram.helper')
 
+//get first row data 
 const { datastatusDefinitionsLeft, datastatusDefinitionsRight } = require('../resources/data.resource');
 
-exports.Statusreportcontroller = async (req, res) => {
+exports.Statusreportcontroller = async (triggerStart, triggerEnd, shift) => {
     try {
         console.log('Route : Internal Status report controller -: ');
         const start = performance.now();
 
         const reports = await scanDynamoDBAllRows();
 
+
+
         // Sort reports by the number of scales in the Telegramscales array
-        reports.sort((a, b) => a.Telegramscales.length - b.Telegramscales.length);
+        reports.sort((a, b) => {
+            const aLength = Array.isArray(a.Telegramscales) ? a.Telegramscales.length : 0; // Check if Telegramscales exists
+            const bLength = Array.isArray(b.Telegramscales) ? b.Telegramscales.length : 0; // Check if Telegramscales exists
+            return aLength - bLength;
+        });
+
 
 
         let reportData = [];
 
-        let item, startTime, endTime, sitename, chatId, scales, shift = 'day',plcIccid;
-        let triggerStart ="00:00",triggerEnd= "04:00";
+        let item, startTime, endTime, sitename, scales, plcIccid;
+
+        let  chatIdTest = '-4019893816'
+
+        let chatId=process.env.DIGITALPUTONSLACK;
+
 
         // Initialize a counter object outside of the loop
         const counts = {
@@ -48,16 +60,16 @@ exports.Statusreportcontroller = async (req, res) => {
             'shiftons reset': 8     // Index 8
         };
 
-        let headerTitle = getCurrentDateFormatted() + ' ,  ' + triggerStart +'-  ' + triggerEnd;
+        let headerTitle = getCurrentDateFormatted() + ' ,  ' + triggerStart + '-  ' + triggerEnd;
 
         // Function to count statuses in a given siteData array
         const countStatuses = (siteData) => {
             siteData.forEach(subArray => {
-            
+
                 // Loop through the indices we want to count
                 Object.entries(statusIndices).forEach(([status, index]) => {
 
-               
+
                     // Check if the index exists in the subArray
                     if (subArray[index] === status) {
                         counts[status]++;
@@ -73,10 +85,8 @@ exports.Statusreportcontroller = async (req, res) => {
 
         // Destructure sites
         for (let index = 0; index < reports.length; index++) {
-        
-        
-            item = reports[index];
 
+            item = reports[index];
             sitename = item.sitename?.S || '';
 
             //  if (sitename !== 'Mzimkhulu') continue;
@@ -85,7 +95,7 @@ exports.Statusreportcontroller = async (req, res) => {
             console.log('---------------------------------------------------------');
             console.log(sitename);
             console.log('Site Count' + ' : ' + (index + 1) + '/' + (reports.length));
-            
+
 
             plcIccid = item.plcIccid?.S || '';
 
@@ -103,46 +113,50 @@ exports.Statusreportcontroller = async (req, res) => {
             shift = (shift === 'day2') ? shift = 'day' : shift;
 
 
-     
+
             //check if report runs 24 hours
 
             scales = item.Telegramscales || [];
 
-            if (!plcIccid) {
-                let siteData = await reportStatusUtility(startTime, endTime, triggerStart, triggerEnd, scales, shift)
-              
-                processSiteData(siteData); // Process first iteration
-                reportData.push({ 'sitename': sitename, 'siteData': siteData[0] });
-            }
+            let siteData;
 
-        
+            siteData = plcIccid
+                ? await reportStatusUtilityPlc(startTime, endTime, triggerStart, triggerEnd, scales, plcIccid, shift)
+                : await reportStatusUtility(startTime, endTime, triggerStart, triggerEnd, scales, shift);
+
+
+
+            reportData.push({ 'sitename': sitename, 'siteData': siteData[0] });
+            processSiteData(siteData); // Process first iteration
         }
 
+
+
+        const leftKeys = ['offline', 'iot offline', 'critical', 'decreased'];
+        const rightKeys = ['reset', 'surpassed', 'exceeded', 'shiftons reset'];
+
+        leftKeys.forEach((key, index) => {
+            datastatusDefinitionsLeft[index][1].text = counts[key];
+        });
+
+        rightKeys.forEach((key, index) => {
+            datastatusDefinitionsRight[index][1].text = counts[key];
+        });
+
+
+        const reportBuffer = await PDFInternalStatusreportGenerator(headerTitle, reportData);
+        var current_date = `${getCurrentDateFormatted()}  triggerEnd, Status.pdf`;
+
         
 
-        //assign counts
-
-        datastatusDefinitionsLeft[0][1].text=counts['offline'];
-        datastatusDefinitionsLeft[1][1].text=counts['iot offline'];
-        datastatusDefinitionsLeft[2][1].text=counts['critical'];
-        datastatusDefinitionsLeft[3][1].text=counts['decreased'];
-
-
-        datastatusDefinitionsRight[0][1].text=counts['reset'];
-        datastatusDefinitionsRight[1][1].text=counts['surpassed'];
-        datastatusDefinitionsRight[2][1].text=counts['exceeded'];
-        datastatusDefinitionsRight[3][1].text=counts['shiftons reset'];
-  
-       await PDFInternalStatusreportGenerator(headerTitle, reportData);
-
-
+        // send report
+       await handleTelegramNotification(chatId, reportBuffer, current_date);
 
         const end = performance.now();
         console.log(`Execution time: ${end - start} milliseconds`);
 
-        res.status(200).send('Data Published');
     } catch (error) {
         console.error('Error in Status report controller:', error);
-        res.status(500).send('Internal server error');
+
     }
 }

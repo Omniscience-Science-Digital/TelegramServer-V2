@@ -1,5 +1,6 @@
 const { scanDynamoDBTableDay, scanDynamoDBTableNight, scanDynamoDBTableExtraShift } = require('./repositories/dynamodb_repository');
 const report_controller = require('./controllers/cron.controller');
+const Statusreportcontroller = require('./controllers/internalStatusreport.controller');
 
 const cron = require('node-cron');
 
@@ -9,6 +10,15 @@ const timeZone = 'Africa/Johannesburg';
 
 
 /**Day Cron Jobs **/
+
+//internal status report
+cron.schedule('0 0 * * *', async () => {
+    
+    let triggerStart ="12:00",triggerEnd= "00:00",shift='day';
+    await Statusreportcontroller.Statusreportcontroller(triggerStart,triggerEnd,shift);
+
+}, { timezone: timeZone });
+
 
 cron.schedule('0 14 * * *', async () => {
     // This cron job triggers every day at 2 PM SAST
@@ -81,6 +91,14 @@ cron.schedule('0 0 * * *', async () => {
 
 
 ///**************************Night SHIFT CRON*****************************///
+//internal status report
+cron.schedule('0 12 * * *', async () => {
+    
+    let triggerStart ="00:00",triggerEnd= "12:00",shift='night';
+    await Statusreportcontroller.Statusreportcontroller(triggerStart,triggerEnd,shift);
+
+}, { timezone: timeZone });
+
 cron.schedule('0 2 * * *', async () => {
     // This cron job triggers every day at 2 AM SAST
     const items = await scanDynamoDBTableNight('02:00');

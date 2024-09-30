@@ -257,6 +257,7 @@ const startingPlcHourtons = async (shift, startTime, endTime, startdate, enddate
                 date,
                 ROW_NUMBER() OVER (PARTITION BY EXTRACT(HOUR FROM date) ORDER BY date ASC) AS row_num
             FROM
+            (status='OK') AND
                public.devicelogs_production_${plcIccid}
             WHERE
                 (datasourcekey = '${title}' )
@@ -275,6 +276,7 @@ const startingPlcHourtons = async (shift, startTime, endTime, startdate, enddate
                
            public.devicelogs_production_${plcIccid}
             WHERE
+            (status='OK') AND
                 (datasourcekey = '${title}' OR datasourcekey = 'modbus-17-0')
                 AND date BETWEEN  timestamp  '${enddate} ${startTime}' AND  timestamp  '${enddate} ${endTime}' + interval '5 minutes'
         
@@ -310,6 +312,7 @@ const startingPlcHourtons = async (shift, startTime, endTime, startdate, enddate
             date,
             ROW_NUMBER() OVER (PARTITION BY EXTRACT(HOUR FROM date) ORDER BY date ASC) AS row_num
         FROM
+        (status='OK') AND
         public.devicelogs_production_${plcIccid}
         WHERE
         (datasourcekey = '${title}' )

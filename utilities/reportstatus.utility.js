@@ -1,7 +1,9 @@
-const { graphQueryModbus } = require('../repositories/internalreport.repository');
+const { graphQueryModbus ,graphQueryModbusPlc} = require('../repositories/internalreport.repository');
 
-async function internalreportStatusCalcsFunc( startTime, endTime,triggerStart,triggerEnd,  startdate, enddate,scales) {
+async function internalreportStatusCalcsFunc( startTime, endTime,triggerStart,triggerEnd,  startdate, enddate,plcIccid,scales) {
 
+
+    
 
     let reportData=[];
 //get scale data using promises
@@ -15,9 +17,12 @@ for (const scale of scales) {
         
     };
 
-    
+    let reportSiteData;
 
-     let reportSiteData = await graphQueryModbus(startTime, endTime,triggerStart ,triggerEnd,startdate,enddate,data.iccid);
+
+    reportSiteData =plcIccid 
+    ? await graphQueryModbusPlc(startTime, endTime,triggerStart ,triggerEnd,startdate,enddate,data.iccid,plcIccid)
+    :await graphQueryModbus(startTime, endTime,triggerStart ,triggerEnd,startdate,enddate,data.iccid,plcIccid);
 
 
      reportSiteData.unshift(data.scaleName);
