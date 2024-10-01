@@ -151,3 +151,12 @@ cron.schedule('0 12 * * *', async () => {
 
 }, { timezone: timeZone });
 
+
+
+// Update none t1 start dates
+
+cron.schedule('0 9 1 * *', async () => {
+    scanDynamoDBTableWithMonthStart()
+    .then(() => console.log('Monthstart updated successfully'))
+    .catch(err => console.error('Error:', err));
+}, { timezone: timeZone });

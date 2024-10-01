@@ -1,4 +1,6 @@
-const { DynamoDBClient, ScanCommand,QueryCommand } = require("@aws-sdk/client-dynamodb");
+const { DynamoDBClient, ScanCommand,QueryCommand,UpdateItemCommand } = require("@aws-sdk/client-dynamodb");
+
+
 
 
 const client = new DynamoDBClient({
@@ -17,6 +19,6 @@ const scalestable = 'Telegramscales-etq3h3wwqjcijhmtd4mfwfbw4q-staging';
 module.exports = {
   ScanCommand,
     reporttable,
-    scalestable,client,QueryCommand
+    scalestable,client,QueryCommand,UpdateItemCommand
   };
 

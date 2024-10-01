@@ -1,16 +1,15 @@
-const { scanDynamoDBTableDay, scanDynamoDBTableNight, scanDynamoDBTableExtraShift } = require('./repositories/dynamodb_repository');
+const cron = require('node-cron');
+
+const { scanDynamoDBTableDay, scanDynamoDBTableNight} = require('./repositories/dynamodb_repository');
 const report_controller = require('./controllers/cron.controller');
-const intternalStatus_controller = require('./controllers/internalStatusreport.controller');
 const Statusreportcontroller = require('./controllers/internalStatusreport.controller');
 
-const cron = require('node-cron');
 
 // Set the time zone to Johannesburg, South Africa (SAST)
 const timeZone = 'Africa/Johannesburg';
 
 
 //type script
-
 
 let runprod_test ="test";
 
@@ -23,6 +22,9 @@ let runprod_test ="test";
         // let triggerStart ="00:00",triggerEnd= "12:00",shift='night';
         
         // await Statusreportcontroller.Statusreportcontroller(triggerStart,triggerEnd,shift);
+
+
+
      
 
     } catch (error) {
@@ -30,35 +32,13 @@ let runprod_test ="test";
     }
 })();
 
-//Hardekool morning 
 
-cron.schedule('0 6 * * *', async () => {
-    // This cron job triggers every day at 6 AM SAST
-    const items = await scanDynamoDBTableNight('06:00');
-    await report_controller.reportdata(items, "night", runprod_test);
-
-
-}, { timezone: timeZone });
-
-//Hardekool evenng
-cron.schedule('0 18 * * *', async () => {
-    // This cron job triggers every day at 6 PM SAST
-
-    const items = await scanDynamoDBTableDay('18:00');
-    await report_controller.reportdata(items, "day", runprod_test);
-
-
-}, { timezone: timeZone });
 
 //testing kleinsee
 cron.schedule('0 23 * * *', async () => {
     // This cron job triggers every day at 22 PM SAST
-
     const items = await scanDynamoDBTableDay('23:00');
-
     await report_controller.reportdata(items, "day", runprod_test);
-
-
 
 }, { timezone: timeZone });
 
@@ -86,7 +66,7 @@ cron.schedule('0 8 * * *', async () => {
 
 
 
-// midninght status report
+//midninight status report
 
 //internal status report
 cron.schedule('0 0 * * *', async () => {

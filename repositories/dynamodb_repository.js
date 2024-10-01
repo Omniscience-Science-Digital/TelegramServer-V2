@@ -1,4 +1,4 @@
-const { ScanCommand, client, reporttable, scalestable } = require("../configs/dynamo_db");
+const { ScanCommand, client, reporttable, scalestable,UpdateItemCommand } = require("../configs/dynamo_db");
 
 
 
@@ -362,3 +362,67 @@ const getDynamoDBItemBySitename = async (sitename) => {
   }
 };
 
+
+// update monthstart in dynamo db
+const getFirstOfCurrentMonth = () => {
+  const date = new Date();
+  date.setDate(1); // Set to the first day of the current month
+  return date.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+};
+
+const getFirstOfPreviousMonth = () => {
+  const date = new Date();
+  date.setMonth(date.getMonth() - 1); // Go to the previous month
+  date.setDate(1); // Set to the first day of that month
+  return date.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+};
+
+module.exports.scanDynamoDBTableWithMonthStart = async () => {
+  const monthStartPrevious = getFirstOfPreviousMonth(); // Get the first of the previous month
+  const monthStartCurrent = getFirstOfCurrentMonth(); // Get the first of the current month
+
+  try {
+    // Scan for items with monthstart of previous month
+    const filterExpression = '#monthStart = :monthStart';
+    const expressionAttributeValues = {
+      ':monthStart': { S: monthStartPrevious },
+    };
+
+    const params = {
+      TableName: reporttable,
+      FilterExpression: filterExpression,
+      ExpressionAttributeNames: {
+        '#monthStart': 'monthstart'
+      },
+      ExpressionAttributeValues: expressionAttributeValues
+    };
+
+    const data = await client.send(new ScanCommand(params));
+    const items = data.Items;
+
+
+    // Update each item to set monthstart to the first of the current month
+    for (const item of items) {
+      const updateParams = {
+        TableName: reporttable,
+        Key: {
+          id: item.id // Replace with your primary key field
+        },
+        UpdateExpression: 'SET #monthStart = :monthStart',
+        ExpressionAttributeNames: {
+          '#monthStart': 'monthstart'
+        },
+        ExpressionAttributeValues: {
+          ':monthStart': { S: monthStartCurrent }
+        }
+      };
+
+      await client.send(new UpdateItemCommand(updateParams));
+      console.log(`Updated item with ID: ${item.id} to monthstart: ${monthStartCurrent}`);
+    }
+    
+  } catch (err) {
+    console.error('Error processing DynamoDB table:', err);
+    throw err;
+  }
+};

@@ -69,7 +69,7 @@ exports.getBillableData = async (req, res) => {
      var current_date =`${getCurrentDateFormatted()}, billable_data.xlsx`;
 
   
-    await handleTelegramNotification('-4019893816', excelbuffer, current_date);
+ //   await handleTelegramNotification('-4019893816', excelbuffer, current_date);
   
         
     console.log('Excel file has been written');
