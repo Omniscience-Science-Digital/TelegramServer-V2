@@ -145,7 +145,8 @@ exports.Statusreportcontroller = async (triggerStart, triggerEnd, shift) => {
 
 
         const reportBuffer = await PDFInternalStatusreportGenerator(headerTitle, reportData);
-        var current_date = `${getCurrentDateFormatted()} ${triggerEnd}, Status.pdf`;
+        var timeformat = getCurrentDateFormatted() + ' ' + triggerEnd;
+        var current_date = `${timeformat}, Status.pdf`;
 
         
 

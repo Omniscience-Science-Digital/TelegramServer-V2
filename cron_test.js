@@ -24,6 +24,8 @@ let runprod_test ="test";
         // await Statusreportcontroller.Statusreportcontroller(triggerStart,triggerEnd,shift);
 
 
+        // let triggerStart ="00:00",triggerEnd= "12:00",shift='night';
+        // await Statusreportcontroller.Statusreportcontroller(triggerStart,triggerEnd,shift);
 
      
 
