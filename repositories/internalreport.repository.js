@@ -129,7 +129,6 @@ SELECT
     END AS shiftons_reset; `;
 
 
-    console.log(query)
 
         const result = await db.query(query);
 
