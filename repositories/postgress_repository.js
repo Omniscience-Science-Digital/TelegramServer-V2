@@ -241,7 +241,7 @@ const startingPlcHourtons = async (shift, startTime, endTime, startdate, enddate
 
   // Format the result as a 24-hour time string (HH:mm)
   endTime = `${newHour < 10 ? '0' : ''}${newHour}:${minute < 10 ? '0' : ''}${minute}`;
-
+  
 
   let query;
   try {
@@ -257,10 +257,10 @@ const startingPlcHourtons = async (shift, startTime, endTime, startdate, enddate
                 date,
                 ROW_NUMBER() OVER (PARTITION BY EXTRACT(HOUR FROM date) ORDER BY date ASC) AS row_num
             FROM
-            (status='OK') AND
+       
                public.devicelogs_production_${plcIccid}
             WHERE
-                (datasourcekey = '${title}' )
+                (datasourcekey = '${title}' )    AND    status = 'OK'
          AND date BETWEEN '${startdate} ${startTime}' AND '${enddate} ${endTime}'
         
         )
@@ -312,10 +312,10 @@ const startingPlcHourtons = async (shift, startTime, endTime, startdate, enddate
             date,
             ROW_NUMBER() OVER (PARTITION BY EXTRACT(HOUR FROM date) ORDER BY date ASC) AS row_num
         FROM
-        (status='OK') AND
+     
         public.devicelogs_production_${plcIccid}
         WHERE
-        (datasourcekey = '${title}' )
+        (datasourcekey = '${title}' )   AND     status = 'OK'
         AND date BETWEEN '${startdate} ${startTime}' AND '${enddate} ${endTime}'
     )
     SELECT
@@ -335,6 +335,7 @@ const startingPlcHourtons = async (shift, startTime, endTime, startdate, enddate
     }
 
 
+ 
 
     const result = await db.query(query);
 
@@ -419,10 +420,11 @@ exports.hourlyPlcShifttons = async (shift, startTime, endTime, startdate, enddat
     //for period shift tons
     const Shifttons = await shiftTonsplc(startTime, endTime, startdate, enddate, title, plcIccid);
 
- 
+    
 
     //hourly Shift tons
     let myData = await startingPlcHourtons(shift, startTime, endTime, startdate, enddate, title, plcIccid);
+
 
     // Initialize the result array
     const differences = [];

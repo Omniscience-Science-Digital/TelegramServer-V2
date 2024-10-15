@@ -289,17 +289,18 @@ module.exports.plcParallelScale = async (startTime, endTime, scales,plcIccid,plc
     
         let cyclonegraphbuffer ;
   
+        
         //check if site ran
         let flow_Values = await plcScaleCalcsFunc(monthstart,shift,postgress_start, postgress_end, startdate, enddate, runningtph, maxUtilization, scales, primaryScalesArray,plcIccid,flowtitle, flowiccid)
         
         
         const myflowObject = await flowObjectDataPLC(postgress_start, postgress_end, startdate, enddate, plcFlow,runningtph,plcIccid);
       
-        
+    
         //handle shift tons 
         let tonnage = await handlePlcShiftons(myflowBuffer,plcIccid, shift, postgress_start, postgress_end, startdate, enddate, scales, monthstart, primaryScalesArray, mtd_target, scaleType, canvas, virtualDatapoints,maxUtilization)
 
-
+       
         let shiftStats = await calculatorCalculations(formulas, tonnage, flow_Values)
         //plot pie charts
 

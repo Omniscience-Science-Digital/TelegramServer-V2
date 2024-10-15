@@ -220,7 +220,7 @@ async function handlePlcShiftons(myflowBuffer,plcIccid, shift, startTime, endTim
 
         let mtdsStarttime = (shift === 'day') ? startTime : endTime;
 
-   
+        
         //calculate mtd achieved
         let mtdsObject = [];
         let mtd_achieved = 0;
@@ -273,7 +273,7 @@ async function handlePlcShiftons(myflowBuffer,plcIccid, shift, startTime, endTim
 
         }
         
-
+        
   
    
         //handle total sshift tons
@@ -298,6 +298,8 @@ async function handlePlcShiftons(myflowBuffer,plcIccid, shift, startTime, endTim
         
             let shift_tons = await hourlyPlcShifttons(shift,startTime, endTime, startdate, enddate, data.iccid,plcIccid);
        
+            
+            
             var shiftonsranges = groupByTimeIntervals(timeintervals, shift_tons.hourlytons);
         
         
@@ -330,7 +332,7 @@ async function handlePlcShiftons(myflowBuffer,plcIccid, shift, startTime, endTim
             total_shifttons.push(formattedData);
         }
         
-
+        
         
         if (scaleType === 'parallel') {
             
