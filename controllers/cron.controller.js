@@ -22,7 +22,7 @@ exports.reportdata = async (sites, shift, flag) => {
 
         sitename = item.sitename?.S || '';
 
-         if (sitename !== 'Blouhoogte Plant 1') continue;
+        //  if (sitename !== 'Blouhoogte Plant 1') continue;
 
 
         console.log('sitename' + ' : '+sitename);
